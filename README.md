@@ -7,6 +7,24 @@ defeitos (RQ2) e complexidade e duplicacao de codigo (RQ3).
 Os katas sao resolvidos em Java. As metricas estaticas sao coletadas com o CK e
 o PMD CPD.
 
+## Katas do experimento
+
+Os 4 katas usados no experimento (autorais, de baixa indexacao, para reduzir o
+risco de memorizacao pela IA) estao em [katas/](katas/). Sao 2 katas com IA e
+2 sem IA por integrante, escolhidos para manter o tempo total de execucao
+(ate 4 trials de 35 min, ~2h20) viavel numa sessao so. Antes de iniciar
+qualquer trial, rode o script de verificacao para confirmar que os testes de
+aceitacao de cada kata estao corretos:
+
+```
+scripts/verify_katas.sh
+```
+
+Ele compila a solucao de referencia de cada kata com os testes JUnit 5 e roda
+tudo, usando o JDK local ou, se nao houver, um container Docker automatico.
+Ver [katas/README.md](katas/README.md) para a lista de katas e a estrutura de
+pastas.
+
 ## Coleta de metricas estaticas
 
 A forma padrao de rodar a coleta e pelo Docker. A unica dependencia da maquina e
@@ -86,6 +104,8 @@ A pasta `bin/` e gerada pelo script. O `min-tokens` e opcional, padrao 100.
 docker/Dockerfile          imagem com JDK 17, Python 3, CK e PMD
 scripts/run_trial.sh       compila o trial e roda a coleta, tudo no container
 scripts/collect_metrics.py script de coleta chamado dentro do container
+scripts/verify_katas.sh    roda os testes de aceitacao de cada kata isoladamente
+katas/<kata>/              enunciado, solucao de referencia e testes de cada kata
 trials/<trial-id>/src      arquivos .java finais de cada trial
 results/metrics_results.csv saida acumulada da coleta
 SETUP.md                   guia detalhado, inclui a alternativa sem Docker
