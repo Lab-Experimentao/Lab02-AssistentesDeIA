@@ -40,6 +40,24 @@ cat results/time_results.csv
 Como o FizzBuzz de teste ja esta correto, o trial termina em poucos segundos
 com `status: sucesso`.
 
+## Katas do experimento
+
+Os 4 katas usados no experimento (autorais, de baixa indexacao, para reduzir o
+risco de memorizacao pela IA) estao em [katas/](katas/). Sao 2 katas com IA e
+2 sem IA por integrante, escolhidos para manter o tempo total de execucao
+(ate 4 trials de 35 min, ~2h20) viavel numa sessao so. Antes de iniciar
+qualquer trial, rode o script de verificacao para confirmar que os testes de
+aceitacao de cada kata estao corretos:
+
+```
+scripts/verify_katas.sh
+```
+
+Ele compila a solucao de referencia de cada kata com os testes JUnit 5 e roda
+tudo, usando o JDK local ou, se nao houver, um container Docker automatico.
+Ver [katas/README.md](katas/README.md) para a lista de katas e a estrutura de
+pastas.
+
 ## Coleta de metricas estaticas
 
 A forma padrao de rodar a coleta e pelo Docker. A unica dependencia da maquina e
@@ -121,6 +139,8 @@ scripts/run_trial.sh       compila o trial e roda a coleta de metricas estaticas
 scripts/collect_metrics.py script de coleta (RQ3) chamado dentro do container
 scripts/time_trial.sh      inicia a cronometragem do time-to-green (RQ1/RQ2)
 scripts/time_trial.py      script de cronometragem chamado dentro do container
+scripts/verify_katas.sh    roda os testes de aceitacao de cada kata isoladamente
+katas/<kata>/              enunciado, solucao de referencia e testes de cada kata
 trials/<trial-id>/src      arquivos .java finais de cada trial (RQ3)
 trials/<trial-id>/test     testes de aceitacao (JUnit) do kata (RQ1/RQ2)
 results/metrics_results.csv saida acumulada da coleta de metricas estaticas
