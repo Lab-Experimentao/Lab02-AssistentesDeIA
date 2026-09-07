@@ -15,6 +15,9 @@
 
 set -euo pipefail
 
+# Evita reescrita de paths tipo "/trials" pelo Git Bash (MSYS) no Windows.
+export MSYS_NO_PATHCONV=1
+
 IMAGE="lab02-metrics"
 
 if [ "$#" -lt 4 ]; then

@@ -1,14 +1,13 @@
-# Imagem para coleta de metricas estaticas do LAB02.
-# Traz JDK 17, Python 3, o CK e o PMD (com o CPD junto) ja instalados em /opt.
-# As pastas trials/ e results/ do host sao montadas como volumes no docker run,
-# assim o container nao depende de nada instalado na maquina local e o CSV de
-# resultados persiste fora do container.
+# Imagem para coleta de metricas estaticas e cronometragem do LAB02.
+# JDK 17, Python 3, CK, PMD e JUnit console ja instalados em /opt.
+# trials/ e results/ do host entram como volumes no docker run.
 
 FROM eclipse-temurin:17-jdk
 
 # Versoes fixas para manter a coleta reproduzivel entre execucoes.
 ARG CK_VERSION=0.7.0
 ARG PMD_VERSION=7.7.0
+ARG JUNIT_VERSION=1.10.2
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends python3 curl unzip \
@@ -25,13 +24,19 @@ RUN curl -fsSL -o /tmp/pmd.zip \
     && mv "/opt/pmd-bin-${PMD_VERSION}" /opt/pmd \
     && rm /tmp/pmd.zip
 
-COPY scripts/collect_metrics.py /opt/collect_metrics.py
+# JUnit console standalone, usado na cronometragem do time-to-green (RQ1/RQ2).
+RUN curl -fsSL -o /opt/junit-console.jar \
+    "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/${JUNIT_VERSION}/junit-platform-console-standalone-${JUNIT_VERSION}.jar"
 
-# O script le esses caminhos por padrao, entao o docker run so precisa dos
-# argumentos de negocio (--trial-id, --kata, --treatment, --integrante, --src, --bin).
+COPY scripts/collect_metrics.py /opt/collect_metrics.py
+COPY scripts/time_trial.py /opt/time_trial.py
+
+# Padrao lido pelos scripts; docker run so passa os argumentos de negocio.
 ENV CK_JAR=/opt/ck.jar
 ENV PMD_BIN=/opt/pmd/bin/pmd
+ENV JUNIT_CONSOLE=/opt/junit-console.jar
 ENV METRICS_OUTPUT=/results/metrics_results.csv
+ENV TIME_OUTPUT=/results/time_results.csv
 
 WORKDIR /results
 
