@@ -1,0 +1,7 @@
+# O build so precisa do Dockerfile e do scripts/collect_metrics.py.
+# Tudo abaixo fica fora do contexto de build.
+.git
+tools
+trials
+results
+*.md
