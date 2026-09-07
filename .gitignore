@@ -1,0 +1,14 @@
+# Ferramentas de metrica baixadas localmente
+tools/
+
+# Binarios compilados dos trials, mantendo a pasta bin/ e o .gitkeep
+trials/**/bin/*
+!trials/**/bin/.gitkeep
+
+# Saida da coleta, nao versionar dados gerados localmente
+results/*.csv
+
+# Arquivos temporarios de coleta
+*.pyc
+__pycache__/
+.DS_Store
