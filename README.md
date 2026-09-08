@@ -5,7 +5,40 @@ manual na resolucao de katas de programacao. As medidas sao tempo (RQ1),
 defeitos (RQ2) e complexidade e duplicacao de codigo (RQ3).
 
 Os katas sao resolvidos em Java. As metricas estaticas sao coletadas com o CK e
-o PMD CPD.
+o PMD CPD. O tempo de resolucao (time-to-green) e os testes de aceitacao
+(JUnit) sao coletados com `scripts/time_trial.sh`.
+
+## Cronometragem do time-to-green (RQ1) e defeitos (RQ2)
+
+A forma padrao de cronometrar um trial e pelo Docker. O guia completo esta em
+[SETUP.md](SETUP.md).
+
+```
+scripts/time_trial.sh <trial-id> <kata> <com_ia|sem_ia> <integrante> [timebox-min]
+```
+
+Rodar o comando ja marca o inicio do trial: o script compila e roda os testes
+de aceitacao do kata em loop, ao vivo, ate o codigo passar em todos eles
+(status `sucesso`) ou o time-box (35 min, so pode ser reduzido) se esgotar sem
+sucesso (status `censurado`, registrado como exatamente o time-box). Ctrl+C
+encerra manualmente (status `abortado`).
+
+Antes de iniciar, o trial precisa ter `trials/<trial-id>/test/` com os testes
+de aceitacao (JUnit) do kata, alem do `trials/<trial-id>/src/` (pode comecar
+vazio ou com o esqueleto do kata, editado ao vivo durante o trial).
+
+O resultado e acrescentado em `results/time_results.csv`, com o tempo
+decorrido e a contagem de testes passando/falhando ao final do tempo.
+
+### Testar o mecanismo de cronometragem
+
+```
+scripts/time_trial.sh trial-teste-fizzbuzz fizzbuzz sem_ia arthur 1
+cat results/time_results.csv
+```
+
+Como o FizzBuzz de teste ja esta correto, o trial termina em poucos segundos
+com `status: sucesso`.
 
 ## Katas do experimento
 
@@ -101,12 +134,16 @@ A pasta `bin/` e gerada pelo script. O `min-tokens` e opcional, padrao 100.
 ## Estrutura
 
 ```
-docker/Dockerfile          imagem com JDK 17, Python 3, CK e PMD
-scripts/run_trial.sh       compila o trial e roda a coleta, tudo no container
-scripts/collect_metrics.py script de coleta chamado dentro do container
+docker/Dockerfile          imagem com JDK 17, Python 3, CK, PMD e JUnit console
+scripts/run_trial.sh       compila o trial e roda a coleta de metricas estaticas
+scripts/collect_metrics.py script de coleta (RQ3) chamado dentro do container
+scripts/time_trial.sh      inicia a cronometragem do time-to-green (RQ1/RQ2)
+scripts/time_trial.py      script de cronometragem chamado dentro do container
 scripts/verify_katas.sh    roda os testes de aceitacao de cada kata isoladamente
 katas/<kata>/              enunciado, solucao de referencia e testes de cada kata
-trials/<trial-id>/src      arquivos .java finais de cada trial
-results/metrics_results.csv saida acumulada da coleta
+trials/<trial-id>/src      arquivos .java finais de cada trial (RQ3)
+trials/<trial-id>/test     testes de aceitacao (JUnit) do kata (RQ1/RQ2)
+results/metrics_results.csv saida acumulada da coleta de metricas estaticas
+results/time_results.csv    saida acumulada da cronometragem
 SETUP.md                   guia detalhado, inclui a alternativa sem Docker
 ```
