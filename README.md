@@ -56,7 +56,8 @@ scripts/verify_katas.sh
 Ele compila a solucao de referencia de cada kata com os testes JUnit 5 e roda
 tudo, usando o JDK local ou, se nao houver, um container Docker automatico.
 Ver [katas/README.md](katas/README.md) para a lista de katas e a estrutura de
-pastas.
+pastas, e [CONTRABALANCEAMENTO.md](CONTRABALANCEAMENTO.md) para a ordem e o
+tratamento (`com_ia`/`sem_ia`) de cada kata por integrante.
 
 ## Coleta de metricas estaticas
 
