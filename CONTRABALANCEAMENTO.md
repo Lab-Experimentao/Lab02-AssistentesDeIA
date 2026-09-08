@@ -3,7 +3,7 @@
 Matriz de contrabalanceamento do experimento: define, para cada
 integrante, em que ordem e com qual tratamento (`com_ia`/`sem_ia`) cada um dos
 4 katas de [katas/](katas/) e resolvido. Cada integrante resolve os 4 katas,
-2 com IA e 2 sem IA, conforme o enunciado do LAB02.
+2 com IA e 2 sem IA.
 
 ## O que o contrabalanceamento evita
 
@@ -21,12 +21,11 @@ integrante, em que ordem e com qual tratamento (`com_ia`/`sem_ia`) cada um dos
 
 ## Metodo
 
-* **Ordem dos katas**: quadrado latino 4x4 (linhas = integrante, colunas =
+* **Ordem dos katas**: quadrado 4x4 (linhas = integrante, colunas =
   posicao 1a-4a), usando 3 das 4 linhas, uma rotacao ciclica por integrante
   (Arthur K1K2K3K4, Felipe K2K3K4K1, Gabriel K3K4K1K2). Nenhum integrante
   repete a sequencia de outro, e cada kata cai em 3 das 4 posicoes possiveis
-  entre os 3 integrantes (so nao cobre a 4a linha do quadrado, que ficaria
-  ociosa com apenas 3 integrantes).
+  entre os 3 integrantes.
 * **Tratamento por posicao**: um padrao alternado de periodo 2 (nunca dois
   trials seguidos com o mesmo tratamento). Arthur e Felipe usam a fase
   "sem_ia, com_ia, sem_ia, com_ia" (na ordem de cada um); Gabriel usa a fase
@@ -37,7 +36,7 @@ integrante, em que ordem e com qual tratamento (`com_ia`/`sem_ia`) cada um dos
 Limitação assumida: com 3 integrantes e 2 fases de tratamento possíveis, a
 divisão de quem começa com IA vs. manual fica 2-para-1 (Felipe e Gabriel
 começam com `com_ia`, Arthur com `sem_ia`); não há como equilibrar 50/50 com
-N ímpar. Fica registrado aqui como ameaça à validade menor do desenho.
+N ímpar.
 
 ## Matriz (por integrante)
 
