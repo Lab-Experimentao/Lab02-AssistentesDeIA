@@ -8,6 +8,10 @@ Os katas sao resolvidos em Java. As metricas estaticas sao coletadas com o CK e
 o PMD CPD. O tempo de resolucao (time-to-green) e os testes de aceitacao
 (JUnit) sao coletados com `scripts/time_trial.sh`.
 
+Desenho completo do experimento (GQM, hipoteses, variaveis, tratamentos, tipo
+de projeto e ameacas a validade) em [DESENHO_EXPERIMENTO.md](DESENHO_EXPERIMENTO.md),
+com o detalhamento de hipoteses e ameacas em [HIPOTESES.md](HIPOTESES.md).
+
 ## Cronometragem do time-to-green (RQ1) e defeitos (RQ2)
 
 A forma padrao de cronometrar um trial e pelo Docker. O guia completo esta em
@@ -147,4 +151,7 @@ trials/<trial-id>/test     testes de aceitacao (JUnit) do kata (RQ1/RQ2)
 results/metrics_results.csv saida acumulada da coleta de metricas estaticas
 results/time_results.csv    saida acumulada da cronometragem
 SETUP.md                   guia detalhado, inclui a alternativa sem Docker
+DESENHO_EXPERIMENTO.md     GQM, hipoteses, variaveis, tratamentos e desenho do experimento
+HIPOTESES.md               H0/H1, variaveis e ameacas a validade, detalhado
+CONTRABALANCEAMENTO.md     ordem e tratamento de cada kata por integrante
 ```
