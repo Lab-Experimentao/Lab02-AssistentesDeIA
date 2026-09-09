@@ -35,8 +35,9 @@ integrantes ou katas, e mantém as métricas comparáveis dentro do experimento.
 descartada porque Radon é para Python, e a linguagem escolhida é Java):
 
 - **CK** (`com.github.mauricioaniche:ck`, versão fixada em `0.7.0` no
-  [docker/Dockerfile](docker/Dockerfile)) extrai complexidade ciclomática
-  média (WMC) por método/classe do código Java produzido em cada trial (RQ3).
+  [docker/Dockerfile](docker/Dockerfile)) extrai a complexidade ciclomática
+  (WMC) de cada método do código Java produzido em cada trial; a métrica
+  usada em RQ3 é a média do WMC entre os métodos do trial.
 - **PMD CPD** (versão `7.7.0`) mede duplicação de código (% de linhas
   duplicadas) sobre o mesmo código (RQ3).
 - **LOC** (linhas de código), extraído junto pelo CK, entra como métrica de
@@ -55,11 +56,11 @@ completo de uso, com alternativa sem Docker, em [SETUP.md](SETUP.md).
 Detalhadas por RQ, com a justificativa de cada métrica escolhida frente às
 alternativas do enunciado, em [HIPOTESES.md](HIPOTESES.md). Resumo:
 
-| RQ | Variável dependente | H0 |
-| --- | --- | --- |
-| RQ1 (tempo) | Time-to-green (min), mediana por tratamento; trial sem sucesso é censurado em 35 min, não descartado | Mediana do time-to-green não difere entre `com_ia` e `sem_ia` |
-| RQ2 (defeitos) | Taxa de sucesso dos testes de aceitação (%); nº absoluto de testes falhando como métrica complementar | Mediana da taxa de sucesso não difere entre `com_ia` e `sem_ia` |
-| RQ3 (estrutura) | Complexidade ciclomática média (CK) e % de duplicação (PMD CPD), com LOC como controle | Mediana da complexidade/duplicação não difere entre `com_ia` e `sem_ia` |
+| RQ | Variável dependente | H0 | Coletada por |
+| --- | --- | --- | --- |
+| RQ1 (tempo) | Time-to-green (min), mediana por tratamento; trial sem sucesso é censurado em 35 min, não descartado | Mediana do time-to-green não difere entre `com_ia` e `sem_ia` | `scripts/time_trial.sh` → `results/time_results.csv` |
+| RQ2 (defeitos) | Taxa de sucesso dos testes de aceitação (%); nº absoluto de testes falhando como métrica complementar | Mediana da taxa de sucesso não difere entre `com_ia` e `sem_ia` | `scripts/time_trial.sh` (mesma execução de RQ1) → `results/time_results.csv` |
+| RQ3 (estrutura) | Complexidade ciclomática média (CK) e % de duplicação (PMD CPD), com LOC como controle | Mediana da complexidade/duplicação não difere entre `com_ia` e `sem_ia` | `scripts/run_trial.sh` → `results/metrics_results.csv` |
 
 **Variável independente**: uso de assistente de IA generativa na resolução
 do kata, binária (`com_ia` / `sem_ia`). O assistente usado em todos os
@@ -106,6 +107,16 @@ estatísticas descritivas e teste de Wilcoxon (pareado, não paramétrico) na
 análise inferencial (Passo 4), consistente com o desenho within-subject.
 
 ## Procedimento e instrumentação
+
+Scripts envolvidos, em ordem de uso:
+
+| Script | Roda em | O que faz |
+| --- | --- | --- |
+| `scripts/verify_katas.sh` | máquina do integrante (ou Docker automático) | Compila a solução de referência de cada kata com os testes JUnit 5 e confirma que todos passam, antes de qualquer trial começar. |
+| `scripts/time_trial.sh` | máquina do integrante | Ponto de entrada da cronometragem (RQ1/RQ2): valida o time-box (máx. 35 min) e o `trial-id`, sobe o container Docker e chama `time_trial.py` dentro dele. |
+| `scripts/time_trial.py` | dentro do container Docker | Compila e roda os testes de aceitação do trial em loop até passar em todos (`sucesso`) ou o time-box esgotar (`censurado`), e grava o resultado em `results/time_results.csv`. |
+| `scripts/run_trial.sh` | máquina do integrante | Ponto de entrada da coleta de métricas estáticas (RQ3): compila o `.java` final do trial e chama `collect_metrics.py` dentro do container. |
+| `scripts/collect_metrics.py` | dentro do container Docker | Roda CK e PMD CPD sobre o código-fonte do trial, calcula LOC, complexidade ciclomática média e % de duplicação, e grava em `results/metrics_results.csv`. |
 
 1. **Antes do experimento**: `scripts/verify_katas.sh` confirma que os
    testes de aceitação dos 4 katas passam contra a solução de referência.
