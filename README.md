@@ -46,10 +46,11 @@ com `status: sucesso`.
 
 ## Katas do experimento
 
-Os 4 katas usados no experimento (autorais, de baixa indexacao, para reduzir o
-risco de memorizacao pela IA) estao em [katas/](katas/). Sao 2 katas com IA e
-2 sem IA por integrante, escolhidos para manter o tempo total de execucao
-(ate 4 trials de 35 min, ~2h20) viavel numa sessao so. Antes de iniciar
+Os 6 katas usados no experimento (autorais, de baixa indexacao, para reduzir o
+risco de memorizacao pela IA) estao em [katas/](katas/) -- os 4 primeiros de
+dificuldade base e mais 2 (`estoque-do-deposito`, `blocos-aninhados`) de
+dificuldade um pouco maior. Sao 3 katas com IA e 3 sem IA por integrante (6
+trials de 35 min por integrante, ~3h30 no total). Antes de iniciar
 qualquer trial, rode o script de verificacao para confirmar que os testes de
 aceitacao de cada kata estao corretos:
 

@@ -76,13 +76,14 @@ para os três integrantes.
 
 ## Objetos experimentais (katas)
 
-4 katas autorais em Java, de dificuldade comparável e baixa indexação (para
-reduzir o risco de o assistente reproduzir uma solução já vista em
-treinamento em vez de efetivamente ajudar): Cofre de Senhas, Elevador do
-Prédio, Etiquetas de Preço e Fila do Caixa. Cada um tem 1-2 métodos
-estáticos, sem I/O nem bibliotecas externas, calibrado para ficar perto do
-teto do time-box (35 min) quando resolvido manualmente. Estrutura de pastas,
-enunciados e critério de dificuldade equivalente em
+6 katas autorais em Java e baixa indexação (para reduzir o risco de o
+assistente reproduzir uma solução já vista em treinamento em vez de
+efetivamente ajudar), em duas faixas de dificuldade: Cofre de Senhas,
+Elevador do Prédio, Etiquetas de Preço e Fila do Caixa (dificuldade base) e
+Estoque do Depósito e Blocos Aninhados (dificuldade um pouco maior). Cada um
+tem 1-2 métodos estáticos, sem I/O nem bibliotecas externas, calibrado para
+ficar perto do teto do time-box (35 min) quando resolvido manualmente.
+Estrutura de pastas, enunciados e critério de dificuldade por faixa em
 [katas/README.md](katas/README.md); os testes de aceitação de cada kata são
 verificados contra uma solução de referência por `scripts/verify_katas.sh`
 antes de qualquer trial começar.
@@ -90,8 +91,8 @@ antes de qualquer trial começar.
 ## Tipo de projeto experimental
 
 **Crossover / within-subject contrabalanceado.** Cada um dos 3 integrantes
-atua como seu próprio controle, passando pelos dois tratamentos (2 katas
-`com_ia`, 2 `sem_ia`). Isso controla a variação individual de habilidade
+atua como seu próprio controle, passando pelos dois tratamentos (3 katas
+`com_ia`, 3 `sem_ia`). Isso controla a variação individual de habilidade
 entre pessoas, que teria peso grande demais num desenho between-subject com
 apenas 3 participantes. A ordem dos katas é contrabalanceada por integrante
 (rotação cíclica) e o tratamento alterna a cada trial (nunca dois seguidos
@@ -101,7 +102,7 @@ o efeito do tratamento. Matriz completa, por integrante e por kata, em
 
 ## Quantidade de medições
 
-3 integrantes × 4 trials cada = **12 trials no total**, 6 `com_ia` e 6
+3 integrantes × 6 trials cada = **18 trials no total**, 9 `com_ia` e 9
 `sem_ia`. Amostra pequena, por isso a análise usa mediana/IQR nas
 estatísticas descritivas e teste de Wilcoxon (pareado, não paramétrico) na
 análise inferencial (Passo 4), consistente com o desenho within-subject.
@@ -119,7 +120,7 @@ Scripts envolvidos, em ordem de uso:
 | `scripts/collect_metrics.py` | dentro do container Docker | Roda CK e PMD CPD sobre o código-fonte do trial, calcula LOC, complexidade ciclomática média e % de duplicação, e grava em `results/metrics_results.csv`. |
 
 1. **Antes do experimento**: `scripts/verify_katas.sh` confirma que os
-   testes de aceitação dos 4 katas passam contra a solução de referência.
+   testes de aceitação dos 6 katas passam contra a solução de referência.
 2. **Cronometragem (RQ1/RQ2)**: `scripts/time_trial.sh <trial-id> <kata>
    <com_ia|sem_ia> <integrante> [timebox-min]` inicia o trial, roda os testes
    de aceitação em loop até passarem todos (`sucesso`) ou o time-box de 35
