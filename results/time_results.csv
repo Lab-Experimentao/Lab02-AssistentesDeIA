@@ -1,0 +1,2 @@
+timestamp,trial_id,kata,treatment,integrante,timebox_min,tempo_seg,status,testes_total,testes_passando,testes_falhando,taxa_sucesso_pct
+2026-09-14T20:14:01+00:00,trial-gabriel-01-etiquetas-de-preco-com_ia,etiquetas-de-preco,com_ia,gabriel,35.0,425.9,sucesso,7,7,0,100.0

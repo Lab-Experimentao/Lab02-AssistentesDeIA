@@ -5,9 +5,6 @@ tools/
 trials/**/bin/*
 !trials/**/bin/.gitkeep
 
-# Saida da coleta, nao versionar dados gerados localmente
-results/*.csv
-
 # Arquivos temporarios de coleta
 *.pyc
 __pycache__/
