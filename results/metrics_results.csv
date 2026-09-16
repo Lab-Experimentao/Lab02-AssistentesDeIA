@@ -5,3 +5,4 @@ timestamp,trial_id,kata,treatment,integrante,loc_total,loc_classes,cc_media,meto
 2026-09-15T20:00:57+00:00,trial-gabriel-04-blocos-aninhados-sem_ia,blocos-aninhados,sem_ia,gabriel,31,33,10.0,2,0,0.0,100
 2026-09-16T02:38:23+00:00,trial-gabriel-05-cofre-de-senhas-com_ia,cofre-de-senhas,com_ia,gabriel,79,81,8.33,3,0,0.0,100
 2026-09-16T18:50:05+00:00,trial-gabriel-06-elevador-do-predio-sem_ia,elevador-do-predio,sem_ia,gabriel,26,28,9.0,1,0,0.0,100
+2026-09-16T22:26:44+00:00,trial-arthur-01-cofre-de-senhas-sem_ia,cofre-de-senhas,sem_ia,arthur,118,122,6.75,4,0,0.0,100

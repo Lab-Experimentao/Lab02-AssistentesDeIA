@@ -5,3 +5,4 @@ timestamp,trial_id,kata,treatment,integrante,timebox_min,tempo_seg,status,testes
 2026-09-15T19:55:57+00:00,trial-gabriel-04-blocos-aninhados-sem_ia,blocos-aninhados,sem_ia,gabriel,35.0,1506.6,sucesso,8,8,0,100.0
 2026-09-16T02:38:03+00:00,trial-gabriel-05-cofre-de-senhas-com_ia,cofre-de-senhas,com_ia,gabriel,35.0,501.0,sucesso,12,12,0,100.0
 2026-09-16T18:49:55+00:00,trial-gabriel-06-elevador-do-predio-sem_ia,elevador-do-predio,sem_ia,gabriel,35.0,861.9,sucesso,8,8,0,100.0
+2026-09-16T22:25:45+00:00,trial-arthur-01-cofre-de-senhas-sem_ia,cofre-de-senhas,sem_ia,arthur,35.0,636.3,sucesso,12,12,0,100.0
