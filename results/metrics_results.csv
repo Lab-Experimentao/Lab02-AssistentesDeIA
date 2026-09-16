@@ -16,3 +16,4 @@ timestamp,trial_id,kata,treatment,integrante,loc_total,loc_classes,cc_media,meto
 2026-09-16T22:50:47+00:00,trial-arthur-05-estoque-do-deposito-sem_ia,estoque-do-deposito,sem_ia,arthur,42,44,8.0,1,0,0.0,100
 2026-09-16T23:02:05+00:00,trial-arthur-02-elevador-do-predio-com_ia,elevador-do-predio,com_ia,arthur,24,28,8.0,1,0,0.0,100
 2026-09-16T23:07:29+00:00,trial-arthur-04-fila-do-caixa-com_ia,fila-do-caixa,com_ia,arthur,27,29,6.0,1,0,0.0,100
+2026-09-16T23:09:59+00:00,trial-arthur-06-blocos-aninhados-com_ia,blocos-aninhados,com_ia,arthur,28,30,9.5,2,0,0.0,100
