@@ -7,3 +7,4 @@ timestamp,trial_id,kata,treatment,integrante,loc_total,loc_classes,cc_media,meto
 2026-09-16T18:50:05+00:00,trial-gabriel-06-elevador-do-predio-sem_ia,elevador-do-predio,sem_ia,gabriel,26,28,9.0,1,0,0.0,100
 2026-09-16T22:26:44+00:00,trial-arthur-01-cofre-de-senhas-sem_ia,cofre-de-senhas,sem_ia,arthur,118,122,6.75,4,0,0.0,100
 2026-09-16T22:40:23+00:00,trial-arthur-03-etiquetas-de-preco-sem_ia,etiquetas-de-preco,sem_ia,arthur,46,48,9.0,1,0,0.0,100
+2026-09-16T22:50:47+00:00,trial-arthur-05-estoque-do-deposito-sem_ia,estoque-do-deposito,sem_ia,arthur,42,44,8.0,1,0,0.0,100
