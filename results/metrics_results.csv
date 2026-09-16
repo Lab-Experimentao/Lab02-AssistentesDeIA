@@ -11,3 +11,6 @@ timestamp,trial_id,kata,treatment,integrante,loc_total,loc_classes,cc_media,meto
 2026-09-16T21:38:21+00:00,trial-felipe-04-estoque-do-deposito-com_ia,estoque-do-deposito,com_ia,felipe,44,46,7.0,1,0,0.0,100
 2026-09-16T22:12:12+00:00,trial-felipe-05-blocos-aninhados-sem_ia,blocos-aninhados,sem_ia,felipe,25,27,9.0,1,0,0.0,100
 2026-09-16T22:23:36+00:00,trial-felipe-06-cofre-de-senhas-com_ia,cofre-de-senhas,com_ia,felipe,65,67,8.33,3,0,0.0,100
+2026-09-16T22:26:44+00:00,trial-arthur-01-cofre-de-senhas-sem_ia,cofre-de-senhas,sem_ia,arthur,118,122,6.75,4,0,0.0,100
+2026-09-16T22:40:23+00:00,trial-arthur-03-etiquetas-de-preco-sem_ia,etiquetas-de-preco,sem_ia,arthur,46,48,9.0,1,0,0.0,100
+2026-09-16T22:50:47+00:00,trial-arthur-05-estoque-do-deposito-sem_ia,estoque-do-deposito,sem_ia,arthur,42,44,8.0,1,0,0.0,100

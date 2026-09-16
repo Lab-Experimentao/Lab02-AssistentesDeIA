@@ -12,6 +12,25 @@ Desenho completo do experimento (GQM, hipoteses, variaveis, tratamentos, tipo
 de projeto e ameacas a validade) em [DESENHO_EXPERIMENTO.md](DESENHO_EXPERIMENTO.md),
 com o detalhamento de hipoteses e ameacas em [HIPOTESES.md](HIPOTESES.md).
 
+## Assistente de IA do experimento
+
+O assistente de IA unico para todos os trials do tratamento `com_ia` e o Claude,
+usado pela interface Claude Code (CLI no terminal). A escolha vale para todos os
+integrantes e todos os katas, para manter o tratamento `com_ia` uniforme entre
+os trials.
+
+* Interface: Claude Code, a mesma ferramenta de linha de comando para todos. Nao
+  vale usar o claude.ai no navegador nem a extensao de IDE, para nao misturar
+  formas de interacao.
+* Modelo: o modelo padrao vigente do Claude Code na data do trial, sem fixar
+  versao. Cada integrante anota no registro do trial qual modelo estava ativo (o
+  Claude Code mostra o id do modelo em uso).
+* Conta: cada integrante usa a propria assinatura do Claude.
+
+Nos trials do tratamento `sem_ia`, nenhum assistente de IA e permitido, nem o
+Claude, nem autocompletar baseado em modelo de linguagem (Copilot e similares).
+Vale apenas consulta a documentacao oficial da linguagem e das bibliotecas.
+
 ## Cronometragem do time-to-green (RQ1) e defeitos (RQ2)
 
 A forma padrao de cronometrar um trial e pelo Docker. O guia completo esta em
