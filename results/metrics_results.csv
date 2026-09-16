@@ -3,3 +3,4 @@ timestamp,trial_id,kata,treatment,integrante,loc_total,loc_classes,cc_media,meto
 2026-09-15T01:57:07+00:00,trial-gabriel-02-fila-do-caixa-sem_ia,fila-do-caixa,sem_ia,gabriel,28,30,7.0,1,0,0.0,100
 2026-09-15T18:36:36+00:00,trial-gabriel-03-estoque-do-deposito-com_ia,estoque-do-deposito,com_ia,gabriel,42,44,7.0,1,0,0.0,100
 2026-09-15T20:00:57+00:00,trial-gabriel-04-blocos-aninhados-sem_ia,blocos-aninhados,sem_ia,gabriel,31,33,10.0,2,0,0.0,100
+2026-09-16T02:38:23+00:00,trial-gabriel-05-cofre-de-senhas-com_ia,cofre-de-senhas,com_ia,gabriel,79,81,8.33,3,0,0.0,100
