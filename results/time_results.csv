@@ -1,0 +1,7 @@
+timestamp,trial_id,kata,treatment,integrante,timebox_min,tempo_seg,status,testes_total,testes_passando,testes_falhando,taxa_sucesso_pct
+2026-09-14T20:14:01+00:00,trial-gabriel-01-etiquetas-de-preco-com_ia,etiquetas-de-preco,com_ia,gabriel,35.0,425.9,sucesso,7,7,0,100.0
+2026-09-15T01:54:33+00:00,trial-gabriel-02-fila-do-caixa-sem_ia,fila-do-caixa,sem_ia,gabriel,35.0,713.1,sucesso,6,6,0,100.0
+2026-09-15T18:35:48+00:00,trial-gabriel-03-estoque-do-deposito-com_ia,estoque-do-deposito,com_ia,gabriel,35.0,381.0,sucesso,8,8,0,100.0
+2026-09-15T19:55:57+00:00,trial-gabriel-04-blocos-aninhados-sem_ia,blocos-aninhados,sem_ia,gabriel,35.0,1506.6,sucesso,8,8,0,100.0
+2026-09-16T02:38:03+00:00,trial-gabriel-05-cofre-de-senhas-com_ia,cofre-de-senhas,com_ia,gabriel,35.0,501.0,sucesso,12,12,0,100.0
+2026-09-16T18:49:55+00:00,trial-gabriel-06-elevador-do-predio-sem_ia,elevador-do-predio,sem_ia,gabriel,35.0,861.9,sucesso,8,8,0,100.0
