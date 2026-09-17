@@ -147,6 +147,21 @@ scripts/run_trial.sh <trial-id> <kata> <com_ia|sem_ia> <integrante> [min-tokens]
 
 A pasta `bin/` e gerada pelo script. O `min-tokens` e opcional, padrao 100.
 
+## Analises pos-hoc: estilo e seguranca
+
+Depois de coletar as metricas estaticas de todos (ou de um grupo) de trials,
+duas analises agregadas rodam sobre o conjunto inteiro de uma vez (leem
+`results/metrics_results.csv` para saber quais trials existem):
+
+```
+scripts/lint_trials.sh              # PMD codestyle -> results/lint_results.csv
+scripts/security_scan.sh [ruleset]  # Semgrep (p/java por padrao) -> results/security_results.csv
+```
+
+As duas comparam `com_ia` vs `sem_ia` (mediana/IQR) no resumo impresso ao
+final. Detalhes, colunas de cada CSV e o aviso sobre reprodutibilidade do
+ruleset do Semgrep em [SETUP.md](SETUP.md#7-analises-pos-hoc-estilo-e-seguranca).
+
 ### Problemas comuns
 
 1. `cat: results/metrics_results.csv: No such file or directory`, o `run_trial.sh`
@@ -159,17 +174,21 @@ A pasta `bin/` e gerada pelo script. O `min-tokens` e opcional, padrao 100.
 ## Estrutura
 
 ```
-docker/Dockerfile          imagem com JDK 17, Python 3, CK, PMD e JUnit console
+docker/Dockerfile          imagem com JDK 17, Python 3, CK, PMD, JUnit console e Semgrep
 scripts/run_trial.sh       compila o trial e roda a coleta de metricas estaticas
 scripts/collect_metrics.py script de coleta (RQ3) chamado dentro do container
 scripts/time_trial.sh      inicia a cronometragem do time-to-green (RQ1/RQ2)
 scripts/time_trial.py      script de cronometragem chamado dentro do container
 scripts/verify_katas.sh    roda os testes de aceitacao de cada kata isoladamente
+scripts/lint_trials.sh     analise pos-hoc de estilo (PMD codestyle) de todos os trials coletados
+scripts/security_scan.sh   analise pos-hoc de seguranca (Semgrep) de todos os trials coletados
 katas/<kata>/              enunciado, solucao de referencia e testes de cada kata
 trials/<trial-id>/src      arquivos .java finais de cada trial (RQ3)
 trials/<trial-id>/test     testes de aceitacao (JUnit) do kata (RQ1/RQ2)
 results/metrics_results.csv saida acumulada da coleta de metricas estaticas
 results/time_results.csv    saida acumulada da cronometragem
+results/lint_results.csv    saida acumulada da analise de estilo
+results/security_results.csv saida acumulada da varredura de seguranca
 SETUP.md                   guia detalhado, inclui a alternativa sem Docker
 DESENHO_EXPERIMENTO.md     GQM, hipoteses, variaveis, tratamentos e desenho do experimento
 HIPOTESES.md               H0/H1, variaveis e ameacas a validade, detalhado

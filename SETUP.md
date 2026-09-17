@@ -15,7 +15,7 @@ A linguagem escolhida para os katas e Java. As ferramentas de metrica sao o CK,
 o PMD CPD e o JUnit (via JUnit Platform Console Standalone).
 
 A forma padrao de rodar a cronometragem e a coleta e pelo Docker (secoes 4 e 5).
-A execucao local (secao 8) fica como alternativa quando nao houver Docker
+A execucao local (secao 9) fica como alternativa quando nao houver Docker
 disponivel.
 
 ## 1. Requisitos
@@ -269,7 +269,48 @@ scripts/run_trial.sh trial-teste-fizzbuzz fizzbuzz sem_ia arthur
 cat results/metrics_results.csv
 ```
 
-## 7. Problemas comuns
+## 7. Analises pos-hoc: estilo e seguranca
+
+Diferente da cronometragem (secao 4) e da coleta de metricas (secao 5), que
+sao por-trial, estas duas rodam uma vez sobre **todos** os trials ja
+coletados de uma vez (leem `results/metrics_results.csv` para saber quais
+trials existem e onde fica o `src/` de cada um). Rode de novo sempre que
+quiser incluir trials novos, o CSV de saida e reescrito do zero a cada vez.
+
+### 7.1 Conformidade de estilo (PMD codestyle)
+
+```
+scripts/lint_trials.sh
+```
+
+Roda o PMD com o ruleset `category/java/codestyle.xml` sobre o `src/` de cada
+trial, conta violacoes de estilo e grava uma linha por trial em
+`results/lint_results.csv` (`trial_id, kata, treatment, integrante,
+loc_total, violacoes_total, violacoes_por_kloc`), com um resumo
+mediana/IQR por tratamento (`com_ia` vs `sem_ia`) impresso no final.
+
+### 7.2 Varredura de vulnerabilidades (Semgrep)
+
+```
+scripts/security_scan.sh [ruleset]
+```
+
+Roda o **Semgrep** (nao o Bandit, que e especifico de Python; o projeto e
+100% Java) sobre o `src/` de cada trial, com o ruleset `p/java` por padrao,
+e grava uma linha por trial em `results/security_results.csv` (`trial_id,
+kata, treatment, integrante, loc_total, vulns_total, vulns_por_kloc,
+vulns_error, vulns_warning, vulns_info`), com o mesmo resumo por tratamento
+no final.
+
+`ruleset` e opcional (`scripts/security_scan.sh p/security-audit`, por
+exemplo, para trocar o pack). **Aviso de reprodutibilidade**: um pack do
+Semgrep Registry (`p/...`) e baixado da nuvem a cada execucao e pode mudar de
+conteudo entre uma coleta e outra, mesmo com a versao do Semgrep fixada na
+imagem. Para reproduzir exatamente a mesma varredura depois, baixe o
+ruleset usado para um `.yml` versionado no repositorio e passe o caminho dele
+como `ruleset`.
+
+## 8. Problemas comuns
 
 1. `cat: results/time_results.csv: No such file or directory` ou o mesmo para
    `metrics_results.csv`: o script correspondente nao chegou a rodar ou
@@ -284,7 +325,7 @@ cat results/metrics_results.csv
    terminal`: o `time_trial.sh` foi chamado de um jeito nao interativo (ex.:
    outro script, pipe). Rode direto num terminal de verdade.
 
-## 8. Alternativa, execucao local sem Docker
+## 9. Alternativa, execucao local sem Docker
 
 Use apenas se nao houver Docker na maquina.
 
