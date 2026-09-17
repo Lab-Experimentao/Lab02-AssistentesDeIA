@@ -102,6 +102,39 @@ duplicação) não difere entre o código produzido `com_ia` e `sem_ia`.
 **H1₃**: a mediana da complexidade ciclomática média (e/ou da % de
 duplicação) é diferente entre o código produzido `com_ia` e `sem_ia`.
 
+### Exploratória: segurança do código (sem H0/H1 formal)
+
+A issue de "varredura de vulnerabilidades" ([scripts/security_scan.sh](scripts/security_scan.sh),
+Semgrep com o ruleset `p/java`, ver [SETUP.md](SETUP.md#7-analises-pos-hoc-estilo-e-seguranca))
+foi rodada sobre os 18 trials coletados. **Resultado: 0 achados em todos os 18
+trials**, tanto `com_ia` quanto `sem_ia`.
+
+Antes de aceitar esse resultado, a ferramenta foi validada contra um arquivo
+Java sintético com vulnerabilidades propositais (uso de MD5, SQL montado por
+concatenação, senha hardcoded, deserialização insegura): o Semgrep detectou
+corretamente 2 dos 4 problemas plantados (`use-of-md5` e
+`formatted-sql-string`), confirmando que a varredura funciona e que o "0" nos
+trials reais reflete o código, não uma falha silenciosa da ferramenta ou do
+script.
+
+Essa análise não foi formalizada como uma RQ4 com H0/H1. Os 6 katas do
+experimento são métodos estáticos puros sobre `String`/array/`Map`/pilha,
+sem I/O, SQL, criptografia ou desserialização, ou seja, sem nenhuma
+superfície de ataque que um scanner estático de Java tipicamente cobre.
+Com **0 em todas as 18 observações** (`com_ia` e `sem_ia` idênticos e
+constantes), não havia variância para nenhum teste estatístico (Wilcoxon
+incluso) detectar: uma hipótese formal aqui nasceria como uma H0 impossível
+de rejeitar pelo próprio desenho dos katas, não por uma conclusão real sobre
+o assistente de IA.
+
+O achado deve ser registrado no Relatório Final como qualitativo/negativo:
+ferramenta rodada e validada, zero vulnerabilidades estáticas detectadas em
+qualquer trial, consistente com o escopo dos katas. Como trabalho futuro,
+fica a sugestão de aumentar a complexidade dos katas (incluindo I/O, SQL ou
+criptografia) num próximo experimento, para gerar superfície de ataque real
+e permitir detectar uma eventual diferença entre `com_ia` e `sem_ia` nessa
+dimensão.
+
 ## Quantidade de medições
 
 3 integrantes × 6 trials cada = **18 trials no total**, 9 `com_ia` e 9

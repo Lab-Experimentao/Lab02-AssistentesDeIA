@@ -1,5 +1,5 @@
 # Imagem para coleta de metricas estaticas e cronometragem do LAB02.
-# JDK 17, Python 3, CK, PMD e JUnit console ja instalados em /opt.
+# JDK 17, Python 3, CK, PMD, JUnit console e Semgrep ja instalados em /opt.
 # trials/ e results/ do host entram como volumes no docker run.
 
 FROM eclipse-temurin:17-jdk
@@ -8,10 +8,15 @@ FROM eclipse-temurin:17-jdk
 ARG CK_VERSION=0.7.0
 ARG PMD_VERSION=7.7.0
 ARG JUNIT_VERSION=1.10.2
+ARG SEMGREP_VERSION=1.90.0
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3 curl unzip \
+    && apt-get install -y --no-install-recommends python3 python3-pip curl unzip \
     && rm -rf /var/lib/apt/lists/*
+
+# Semgrep (varredura de vulnerabilidades, RQ de seguranca)
+RUN pip3 install --no-cache-dir --break-system-packages "semgrep==${SEMGREP_VERSION}" \
+    && pip3 install --no-cache-dir --break-system-packages "protobuf>=6.30" "setuptools<81"
 
 # CK, jar com dependencias publicado no Maven Central.
 RUN curl -fsSL -o /opt/ck.jar \
@@ -31,6 +36,7 @@ RUN curl -fsSL -o /opt/junit-console.jar \
 COPY scripts/collect_metrics.py /opt/collect_metrics.py
 COPY scripts/time_trial.py /opt/time_trial.py
 COPY scripts/lint_trials.py /opt/lint_trials.py
+COPY scripts/security_scan.py /opt/security_scan.py
 
 # Padrao lido pelos scripts; docker run so passa os argumentos de negocio.
 ENV CK_JAR=/opt/ck.jar
