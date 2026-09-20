@@ -36,6 +36,7 @@ RUN curl -fsSL -o /opt/junit-console.jar \
 COPY scripts/collect_metrics.py /opt/collect_metrics.py
 COPY scripts/time_trial.py /opt/time_trial.py
 COPY scripts/lint_trials.py /opt/lint_trials.py
+COPY scripts/correlacao_tempo_violacoes.py /opt/correlacao_tempo_violacoes.py
 COPY scripts/security_scan.py /opt/security_scan.py
 
 # Padrao lido pelos scripts; docker run so passa os argumentos de negocio.
