@@ -165,11 +165,15 @@ scripts/collect_metrics.py script de coleta (RQ3) chamado dentro do container
 scripts/time_trial.sh      inicia a cronometragem do time-to-green (RQ1/RQ2)
 scripts/time_trial.py      script de cronometragem chamado dentro do container
 scripts/verify_katas.sh    roda os testes de aceitacao de cada kata isoladamente
+scripts/lint_trials.sh     violacoes de estilo (PMD codestyle) de todos os trials
+scripts/correlacao_tempo_violacoes.sh  correlacao tempo x violacoes por tratamento
 katas/<kata>/              enunciado, solucao de referencia e testes de cada kata
 trials/<trial-id>/src      arquivos .java finais de cada trial (RQ3)
 trials/<trial-id>/test     testes de aceitacao (JUnit) do kata (RQ1/RQ2)
 results/metrics_results.csv saida acumulada da coleta de metricas estaticas
 results/time_results.csv    saida acumulada da cronometragem
+results/lint_results.csv    violacoes de estilo por trial
+results/correlacao_tempo_violacoes.csv  Spearman tempo x violacoes por tratamento
 SETUP.md                   guia detalhado, inclui a alternativa sem Docker
 DESENHO_EXPERIMENTO.md     GQM, hipoteses, variaveis, tratamentos e desenho do experimento
 HIPOTESES.md               H0/H1, variaveis e ameacas a validade, detalhado
