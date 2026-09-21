@@ -181,6 +181,7 @@ scripts/time_trial.sh      inicia a cronometragem do time-to-green (RQ1/RQ2)
 scripts/time_trial.py      script de cronometragem chamado dentro do container
 scripts/verify_katas.sh    roda os testes de aceitacao de cada kata isoladamente
 scripts/correlacao_tempo_violacoes.sh  correlacao tempo x violacoes por tratamento
+scripts/normalizacao_estilo_loc.sh  violacoes de estilo por 100 LOC, com_ia vs sem_ia
 scripts/lint_trials.sh     analise pos-hoc de estilo (PMD codestyle) de todos os trials coletados
 scripts/security_scan.sh   analise pos-hoc de seguranca (Semgrep) de todos os trials coletados
 katas/<kata>/              enunciado, solucao de referencia e testes de cada kata
@@ -189,6 +190,8 @@ trials/<trial-id>/test     testes de aceitacao (JUnit) do kata (RQ1/RQ2)
 results/metrics_results.csv saida acumulada da coleta de metricas estaticas
 results/time_results.csv    saida acumulada da cronometragem
 results/correlacao_tempo_violacoes.csv  Spearman tempo x violacoes por tratamento
+results/lint_normalizado.csv  violacoes por 100 LOC por trial
+results/lint_normalizado_comparacao.csv  testes com_ia vs sem_ia (LOC, brutas, por 100 LOC)
 results/lint_results.csv    saida acumulada da analise de estilo
 results/security_results.csv saida acumulada da varredura de seguranca
 SETUP.md                   guia detalhado, inclui a alternativa sem Docker
