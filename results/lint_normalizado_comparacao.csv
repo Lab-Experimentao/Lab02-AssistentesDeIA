@@ -1,0 +1,4 @@
+metrica,mediana_com_ia,iqr_com_ia,mediana_sem_ia,iqr_sem_ia,wilcoxon_kata_W,wilcoxon_kata_n,wilcoxon_kata_p,mannwhitney_U,mannwhitney_p
+loc_total,41,16.0,31,14.0,1.0,5,0.125,46.5,0.6238
+violacoes_total,10,4.0,8,6.0,9.0,6,0.8438,50.5,0.3968
+violacoes_por_100loc,27.27,7.68,22.58,16.77,14.0,6,0.5625,41.5,0.9497
