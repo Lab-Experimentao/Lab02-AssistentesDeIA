@@ -36,9 +36,12 @@ RUN curl -fsSL -o /opt/junit-console.jar \
 COPY scripts/collect_metrics.py /opt/collect_metrics.py
 COPY scripts/time_trial.py /opt/time_trial.py
 COPY scripts/lint_trials.py /opt/lint_trials.py
+COPY scripts/stats_utils.py /opt/stats_utils.py
 COPY scripts/correlacao_tempo_violacoes.py /opt/correlacao_tempo_violacoes.py
 COPY scripts/security_scan.py /opt/security_scan.py
 COPY scripts/normalizacao_estilo_loc.py /opt/normalizacao_estilo_loc.py
+COPY scripts/tamanho_efeito_rq1_rq3.py /opt/tamanho_efeito_rq1_rq3.py
+COPY scripts/outliers.py /opt/outliers.py
 
 # Padrao lido pelos scripts; docker run so passa os argumentos de negocio.
 ENV CK_JAR=/opt/ck.jar

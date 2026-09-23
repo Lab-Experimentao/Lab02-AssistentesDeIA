@@ -6,21 +6,33 @@ Para separar "codigo mais verboso" de "menos conforme", compara tres metricas:
 LOC, violacoes brutas e violacoes por 100 LOC. Cada uma recebe dois testes
 exatos (sem scipy):
   - Wilcoxon signed-rank pareado por kata (6 pares; controla a dificuldade e o
-    tamanho do kata, ja que cada kata aparece 2x num tratamento e 1x no outro)
-  - Mann-Whitney U nao pareado (9 vs 9)
+    tamanho do kata, ja que cada kata aparece 2x num tratamento e 1x no outro),
+    com o tamanho de efeito r rank-biserial derivado do W+.
+  - Mann-Whitney U nao pareado (9 vs 9), com o tamanho de efeito Cliff's delta
+    derivado do U.
 Tambem decompoe a diferenca bruta de violacoes em efeito de tamanho (LOC) e
 efeito de taxa (violacoes por LOC).
+
+Aviso sobre N pequeno: com 6 pares (Wilcoxon) ou 9 vs 9 (Mann-Whitney), o
+valor de r/delta tem variancia amostral alta - uma classificacao "grande"
+aqui e indicativa, nao conclusiva.
 """
 
 import argparse
 import csv
-import itertools
 import statistics
 import sys
-from collections import defaultdict
 from pathlib import Path
 
-from correlacao_tempo_violacoes import ranks
+from stats_utils import (
+    classificar_delta,
+    cliffs_delta_from_u,
+    iqr,
+    mann_whitney_exato,
+    medias_por_kata,
+    rank_biserial_from_w,
+    wilcoxon_exato,
+)
 
 TRIAL_FIELDS = [
     "trial_id",
@@ -40,8 +52,12 @@ COMPARACAO_FIELDS = [
     "wilcoxon_kata_W",
     "wilcoxon_kata_n",
     "wilcoxon_kata_p",
+    "wilcoxon_kata_r",
+    "wilcoxon_kata_r_interpretacao",
     "mannwhitney_U",
     "mannwhitney_p",
+    "cliffs_delta",
+    "cliffs_delta_interpretacao",
 ]
 METRICAS = [
     ("loc_total", "LOC (verbosidade)"),
@@ -49,8 +65,6 @@ METRICAS = [
     ("violacoes_por_100loc", "violacoes por 100 LOC"),
 ]
 COM, SEM = "com_ia", "sem_ia"
-EPS = 1e-9
-MAX_N_MANNWHITNEY = 20
 
 
 def parse_args(argv):
@@ -89,61 +103,6 @@ def read_trials(path):
                 }
             )
     return trials
-
-
-def iqr(valores):
-    if len(valores) < 2:
-        return 0.0
-    q1, _, q3 = statistics.quantiles(valores, n=4, method="inclusive")
-    return q3 - q1
-
-
-def wilcoxon_exato(diferencas):
-    """Signed-rank exato bilateral. Devolve (W+, n sem zeros, p) ou None."""
-    d = [x for x in diferencas if abs(x) > EPS]
-    n = len(d)
-    if n == 0:
-        return None
-    r = ranks([abs(x) for x in d])
-    w_mais = sum(rk for rk, x in zip(r, d) if x > 0)
-    centro = sum(r) / 2
-    obs = abs(w_mais - centro)
-    extremos = 0
-    for sinais in itertools.product((0, 1), repeat=n):
-        w = sum(rk for rk, s in zip(r, sinais) if s)
-        if abs(w - centro) >= obs - EPS:
-            extremos += 1
-    return w_mais, n, extremos / 2**n
-
-
-def mann_whitney_exato(a, b):
-    """U exato bilateral por permutacao dos rotulos. Devolve (U de a, p)."""
-    n1, n2 = len(a), len(b)
-    if n1 + n2 > MAX_N_MANNWHITNEY:
-        sys.exit(f"Erro: n={n1 + n2} inviabiliza o teste exato (maximo {MAX_N_MANNWHITNEY}).")
-    r = ranks(a + b)
-    base = n1 * (n1 + 1) / 2
-    u_obs = sum(r[:n1]) - base
-    centro = n1 * n2 / 2
-    extremos = total = 0
-    for comb in itertools.combinations(range(n1 + n2), n1):
-        u = sum(r[i] for i in comb) - base
-        total += 1
-        if abs(u - centro) >= abs(u_obs - centro) - EPS:
-            extremos += 1
-    return u_obs, extremos / total
-
-
-def medias_por_kata(trials, campo):
-    por_kata = defaultdict(lambda: defaultdict(list))
-    for t in trials:
-        por_kata[t["kata"]][t["treatment"]].append(t[campo])
-    resultado = {}
-    for kata, grupos in sorted(por_kata.items()):
-        if COM not in grupos or SEM not in grupos:
-            sys.exit(f"Erro: kata {kata} sem os dois tratamentos, nao da para parear.")
-        resultado[kata] = (statistics.mean(grupos[COM]), statistics.mean(grupos[SEM]))
-    return resultado
 
 
 def write_csv(path, fields, rows):
@@ -189,11 +148,16 @@ def main(argv):
         pares = medias_por_kata(trials, campo)
         wil = wilcoxon_exato([c - s for c, s in pares.values()])
         w, n_w, p_w = wil if wil else (None, 0, None)
+        r_w = rank_biserial_from_w(w, n_w) if wil else None
+        interpretacao_r = classificar_delta(r_w)
         u, p_u = mann_whitney_exato(v_com, v_sem)
+        delta = cliffs_delta_from_u(u, len(v_com), len(v_sem))
+        interpretacao_delta = classificar_delta(delta)
 
         print(
             f"  {nome}: {med_com:g} (IQR {iqr(v_com):g}) | {med_sem:g} (IQR {iqr(v_sem):g})  "
-            f"Wilcoxon W+={w} (n={n_w}) p={p_w:.3f}  Mann-Whitney U={u:g} p={p_u:.3f}"
+            f"Wilcoxon W+={w} (n={n_w}) p={p_w:.3f} r={r_w} ({interpretacao_r})  "
+            f"Mann-Whitney U={u:g} p={p_u:.3f} delta={delta} ({interpretacao_delta})"
         )
         comparacao.append(
             {
@@ -205,8 +169,12 @@ def main(argv):
                 "wilcoxon_kata_W": w,
                 "wilcoxon_kata_n": n_w,
                 "wilcoxon_kata_p": round(p_w, 4),
+                "wilcoxon_kata_r": r_w,
+                "wilcoxon_kata_r_interpretacao": interpretacao_r,
                 "mannwhitney_U": u,
                 "mannwhitney_p": round(p_u, 4),
+                "cliffs_delta": delta,
+                "cliffs_delta_interpretacao": interpretacao_delta,
             }
         )
 
