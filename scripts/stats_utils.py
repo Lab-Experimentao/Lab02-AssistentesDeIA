@@ -89,11 +89,25 @@ def medias_por_kata(trials, campo):
     return resultado
 
 
+def quartis(valores):
+    """(Q1, Q3) pelo metodo inclusive (interpolacao linear)."""
+    q1, _, q3 = statistics.quantiles(valores, n=4, method="inclusive")
+    return q1, q3
+
+
 def iqr(valores):
     if len(valores) < 2:
         return 0.0
-    q1, _, q3 = statistics.quantiles(valores, n=4, method="inclusive")
+    q1, q3 = quartis(valores)
     return q3 - q1
+
+
+def cercas_tukey(valores, k=1.5):
+    """Cercas de Tukey (cerca_inferior, cerca_superior) = Q1-k*IQR, Q3+k*IQR.
+    k=1.5 e a convencao usual para outlier "moderado", k=3 para "extremo"."""
+    q1, q3 = quartis(valores)
+    largura = q3 - q1
+    return q1 - k * largura, q3 + k * largura
 
 
 def cliffs_delta_from_u(u, n1, n2):

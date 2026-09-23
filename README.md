@@ -158,10 +158,11 @@ trials existem):
 scripts/lint_trials.sh              # PMD codestyle -> results/lint_results.csv
 scripts/security_scan.sh [ruleset]  # Semgrep (p/java por padrao) -> results/security_results.csv
 scripts/tamanho_efeito_rq1_rq3.sh   # Wilcoxon+r / Mann-Whitney+Cliff's delta (RQ1 tempo, RQ3 cc_media/duplicacao) -> results/tamanho_efeito_rq1_rq3.csv
+scripts/outliers.sh                 # cercas de Tukey (1,5x/3x IQR) sobre o dataset consolidado -> results/outliers.csv
 ```
 
-As tres comparam `com_ia` vs `sem_ia` (mediana/IQR, e a ultima tambem
-p-valor e tamanho de efeito) no resumo impresso ao final. Detalhes, colunas
+As quatro comparam ou revisam `com_ia` vs `sem_ia` (mediana/IQR, e algumas
+tambem p-valor e tamanho de efeito) no resumo impresso ao final. Detalhes, colunas
 de cada CSV e o aviso sobre reprodutibilidade do ruleset do Semgrep em
 [SETUP.md](SETUP.md#7-analises-pos-hoc-estilo-e-seguranca); a justificativa
 estatistica do tamanho de efeito (Cliff's delta / r rank-biserial, de onde
@@ -192,6 +193,7 @@ scripts/lint_trials.sh     analise pos-hoc de estilo (PMD codestyle) de todos os
 scripts/security_scan.sh   analise pos-hoc de seguranca (Semgrep) de todos os trials coletados
 scripts/stats_utils.py     postos/Wilcoxon/Mann-Whitney exatos e tamanho de efeito, usado pelos scripts acima
 scripts/tamanho_efeito_rq1_rq3.sh  Wilcoxon+r e Mann-Whitney+Cliff's delta para RQ1 (tempo) e RQ3 (cc_media/duplicacao)
+scripts/outliers.sh        identifica outliers no dataset consolidado (cercas de Tukey)
 katas/<kata>/              enunciado, solucao de referencia e testes de cada kata
 trials/<trial-id>/src      arquivos .java finais de cada trial (RQ3)
 trials/<trial-id>/test     testes de aceitacao (JUnit) do kata (RQ1/RQ2)
@@ -203,6 +205,7 @@ results/lint_normalizado_comparacao.csv  testes com_ia vs sem_ia (LOC, brutas, p
 results/lint_results.csv    saida acumulada da analise de estilo
 results/security_results.csv saida acumulada da varredura de seguranca
 results/tamanho_efeito_rq1_rq3.csv  Wilcoxon/Mann-Whitney + tamanho de efeito para RQ1/RQ3
+results/outliers.csv        cercas de Tukey por trial/metrica, dataset consolidado
 SETUP.md                   guia detalhado, inclui a alternativa sem Docker
 DESENHO_EXPERIMENTO.md     GQM, hipoteses, variaveis, tratamentos e desenho do experimento
 HIPOTESES.md               H0/H1, variaveis e ameacas a validade, detalhado

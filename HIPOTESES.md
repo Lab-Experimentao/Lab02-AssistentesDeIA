@@ -256,6 +256,67 @@ com a recomendação do enunciado de usar mediana/IQR nas estatísticas
 descritivas e teste de Wilcoxon (pareado, não paramétrico) na análise
 inferencial, dado o desenho within-subject.
 
+## Identificação e tratamento de outliers
+
+Revisão do dataset consolidado dos 18 trials
+([scripts/outliers.sh](scripts/outliers.sh)), em duas frentes:
+
+**1. Checagem categórica** (não é por cerca estatística, é sim/não): nenhum
+dos 18 trials tem `status` diferente de `sucesso` ou algum teste falhando ao
+final do time-box. Ou seja, o exemplo citado no enunciado desta análise
+("censura por bug no ambiente, não pelo tempo") **não tem nenhuma linha
+correspondente no dataset consolidado como ele está hoje** — não há trial
+censurado, abortado ou com defeito registrado entre os 18.
+
+Isso não significa que nenhum incidente aconteceu durante a coleta: o trial
+`trial-felipe-01-elevador-do-predio-sem_ia` teve um travamento real de
+ambiente (processo Java do JUnit preso a 100% de CPU por ~13 min dentro do
+container Docker, sem progresso). O trial foi abortado e reiniciado do zero
+antes de qualquer linha ser gravada, então a linha commitada (1414,8s,
+`sucesso`) já é da segunda tentativa, sem contaminação de tempo — e mesmo
+assim não cruza nenhuma cerca estatística abaixo. Registrado aqui por
+transparência, não como um outlier a decidir.
+
+**2. Cercas de Tukey** (1,5×IQR moderado, 3×IQR extremo), calculadas sobre
+os 18 valores de cada métrica (`tempo_seg`, `loc_total`, `cc_media`,
+`duplicacao_pct`, `violacoes_por_100loc`) — pool do conjunto inteiro, não
+separado por tratamento ou por kata, já que n=9 (por tratamento) ou n=2-3
+(por kata) é pequeno demais para um quartil confiável; a leitura de contexto
+de cada ponto sinalizado vem a seguir, em prosa.
+
+**Resultado real** (`results/outliers.csv`, 90 linhas = 18 trials × 5
+métricas): só `loc_total` tem pontos fora da cerca, e são dois, os dois do
+mesmo kata:
+
+| Trial | Kata | Tratamento | LOC | Cerca 1,5x | Cerca 3x | Classificação |
+| --- | --- | --- | --- | --- | --- | --- |
+| `trial-arthur-01-cofre-de-senhas-sem_ia` | Cofre de Senhas | `sem_ia` | 118 | [4,75, 66,75] | [-18,5, 90,0] | **outlier extremo** |
+| `trial-gabriel-05-cofre-de-senhas-com_ia` | Cofre de Senhas | `com_ia` | 79 | [4,75, 66,75] | [-18,5, 90,0] | outlier moderado |
+
+`tempo_seg`, `cc_media`, `duplicacao_pct` e `violacoes_por_100loc` não têm
+nenhum ponto fora da cerca 1,5x em nenhum dos 18 trials — em particular,
+`tempo_seg` varia ~60x entre o trial mais rápido (25,3s) e o mais lento
+(1506,6s) sem cruzar a cerca superior (~1728s): essa variação é o próprio
+efeito grande de RQ1 já documentado acima, não uma anomalia.
+
+**Decisão: manter os dois, sem exclusão.** Dos 3 trials do kata Cofre de
+Senhas, 2 de 3 são outliers de LOC relativos aos outros 15 trials (o
+terceiro, `trial-felipe-06-cofre-de-senhas-com_ia`, tem LOC=65, dentro da
+cerca) — isso aponta para o próprio kata como causa, não para os dois
+trials individualmente: Cofre de Senhas é o único kata com 2 métodos
+(`classify` e `rank`, ver [katas/README.md](katas/README.md)) e portanto
+inerentemente maior que os outros 5. Não há indício de dado corrompido ou
+falha de ambiente nesses dois trials — são o sinal esperado de "kata maior
+gera mais código", não um artefato de coleta.
+
+**Política adotada**: um outlier estatístico não é excluído por padrão.
+Só seria candidato a exclusão havendo evidência concreta de dado corrompido
+por falha de ambiente/infraestrutura, o que não é o caso de nenhum dos 18
+trials hoje (o único incidente de ambiente real, descrito acima, não deixou
+esse tipo de rastro no dado final). Isso não muda a política já adotada
+para censura no time-box (nunca descartada, ver RQ1 e a tabela abaixo) —
+é uma categoria adicional e complementar, não uma substituição dela.
+
 ## Ameaças à validade
 
 | Ameaça | Risco | Mitigação adotada |
@@ -268,3 +329,4 @@ inferencial, dado o desenho within-subject.
 | Dificuldade desigual entre katas | Mesmo calibrados para ficar perto do teto do time-box manualmente, diferenças residuais de dificuldade entre os katas podem se misturar ao efeito do tratamento em comparações que não sejam corretamente pareadas por integrante/posição. Os katas 5-6 são deliberadamente mais difíceis que os 1-4 (ver [katas/README.md](katas/README.md)), o que aumenta esse risco se comparado ponto a ponto entre katas em vez de pareado por integrante/posição. | Mitigado pelo desenho crossover (cada integrante passa pelos dois tratamentos) e pela conferência de que cada kata aparece nos dois tratamentos; discutido como limitação residual no Relatório Final. |
 | Censura no time-box | Um trial que não termina em 35 min é um dado incompleto, não um "tempo real" de conclusão; tratá-lo como dado comum distorceria a mediana. | Registrado como censurado em exatamente 35 min (não descartado), sinalizado no `results/time_results.csv` pelo status (`sucesso`/`censurado`/`abortado`) gerado por `scripts/time_trial.sh`. |
 | Ambiente/hardware entre integrantes | Máquinas, IDEs ou latência de rede diferentes entre integrantes podem afetar o tempo de forma alheia ao tratamento. | Não controlado experimentalmente (fora do escopo do grupo padronizar hardware); registrado como limitação. |
+| Outliers/anomalias no dataset | Um trial discrepante (por bug de coleta, falha de ambiente, ou apenas variação real grande) poderia distorcer mediana/IQR se não fosse revisado. | Revisão sistemática via `scripts/outliers.sh` (cercas de Tukey 1,5x/3x IQR + checagem categórica de status/defeitos) sobre os 18 trials; ver seção "Identificação e tratamento de outliers" acima para o resultado e a decisão de manter todos. |
