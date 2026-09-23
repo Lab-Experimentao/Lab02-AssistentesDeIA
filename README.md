@@ -159,15 +159,24 @@ scripts/lint_trials.sh              # PMD codestyle -> results/lint_results.csv
 scripts/security_scan.sh [ruleset]  # Semgrep (p/java por padrao) -> results/security_results.csv
 scripts/tamanho_efeito_rq1_rq3.sh   # Wilcoxon+r / Mann-Whitney+Cliff's delta (RQ1 tempo, RQ3 cc_media/duplicacao) -> results/tamanho_efeito_rq1_rq3.csv
 scripts/outliers.sh                 # cercas de Tukey (1,5x/3x IQR) sobre o dataset consolidado -> results/outliers.csv
+scripts/build_dashboard.sh          # dashboard HTML (boxplots + slope charts) -> results/dashboard.html, NAO precisa de Docker
 ```
 
-As quatro comparam ou revisam `com_ia` vs `sem_ia` (mediana/IQR, e algumas
+As quatro primeiras comparam ou revisam `com_ia` vs `sem_ia` (mediana/IQR, e algumas
 tambem p-valor e tamanho de efeito) no resumo impresso ao final. Detalhes, colunas
 de cada CSV e o aviso sobre reprodutibilidade do ruleset do Semgrep em
 [SETUP.md](SETUP.md#7-analises-pos-hoc-estilo-e-seguranca); a justificativa
 estatistica do tamanho de efeito (Cliff's delta / r rank-biserial, de onde
 vem cada medida e a ressalva sobre N pequeno) em
 [HIPOTESES.md](HIPOTESES.md#tamanho-de-efeito-complementa-o-p-valor-de-rq1-e-rq3).
+
+`scripts/build_dashboard.sh` é diferente dos outros quatro: não roda testes
+estatísticos novos, só reorganiza o que os outros já calcularam (boxplots +
+gráfico de linha por kata, KPIs, tabela de outliers) num `results/dashboard.html`
+autocontido (Apache ECharts via CDN), pronto para abrir no navegador e
+exportar os gráficos (ícone de câmera no canto de cada um) para o Relatório
+Final. Não precisa de Docker, só de um `python`/`python3`/`py` qualquer no
+PATH.
 
 ### Problemas comuns
 
@@ -194,6 +203,7 @@ scripts/security_scan.sh   analise pos-hoc de seguranca (Semgrep) de todos os tr
 scripts/stats_utils.py     postos/Wilcoxon/Mann-Whitney exatos e tamanho de efeito, usado pelos scripts acima
 scripts/tamanho_efeito_rq1_rq3.sh  Wilcoxon+r e Mann-Whitney+Cliff's delta para RQ1 (tempo) e RQ3 (cc_media/duplicacao)
 scripts/outliers.sh        identifica outliers no dataset consolidado (cercas de Tukey)
+scripts/build_dashboard.sh  gera o dashboard HTML (boxplots + slope charts), sem Docker
 katas/<kata>/              enunciado, solucao de referencia e testes de cada kata
 trials/<trial-id>/src      arquivos .java finais de cada trial (RQ3)
 trials/<trial-id>/test     testes de aceitacao (JUnit) do kata (RQ1/RQ2)
@@ -206,6 +216,7 @@ results/lint_results.csv    saida acumulada da analise de estilo
 results/security_results.csv saida acumulada da varredura de seguranca
 results/tamanho_efeito_rq1_rq3.csv  Wilcoxon/Mann-Whitney + tamanho de efeito para RQ1/RQ3
 results/outliers.csv        cercas de Tukey por trial/metrica, dataset consolidado
+results/dashboard.html      dashboard visual (boxplots + slope charts), para o Relatorio Final
 SETUP.md                   guia detalhado, inclui a alternativa sem Docker
 DESENHO_EXPERIMENTO.md     GQM, hipoteses, variaveis, tratamentos e desenho do experimento
 HIPOTESES.md               H0/H1, variaveis e ameacas a validade, detalhado
