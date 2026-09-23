@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard - Lab02 Assistentes de IA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/6.1.0/echarts.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f7fb;
+    --card-bg: #ffffff;
+    --texto: #1f2430;
+    --texto-suave: #5c6270;
+    --borda: #e4e4ec;
+    --com-ia: #6c5ce7;
+    --sem-ia: #00b894;
+    --alerta: #e17055;
+    --sombra: 0 1px 3px rgba(20, 20, 40, 0.08), 0 1px 2px rgba(20, 20, 40, 0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--texto);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    padding-block: 32px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; }
+  header.topo { margin-bottom: 28px; }
+  header.topo h1 { margin: 0 0 6px; font-size: 1.6rem; }
+  header.topo p { margin: 0; color: var(--texto-suave); font-size: 0.95rem; }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .kpi {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--sombra);
+    padding: 16px 18px;
+    border-left: 4px solid var(--com-ia);
+  }
+  .kpi h3 { margin: 0 0 6px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--texto-suave); }
+  .kpi .valor { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; }
+  .kpi .detalhe { font-size: 0.82rem; color: var(--texto-suave); }
+
+  section.painel {
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: var(--sombra);
+    padding: 20px 22px 8px;
+    margin-bottom: 22px;
+  }
+  section.painel h2 { margin: 0 0 4px; font-size: 1.15rem; }
+  section.painel .subtitulo { color: var(--texto-suave); font-size: 0.88rem; margin-bottom: 10px; }
+  .graficos-par {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 10px;
+  }
+  .grafico { width: 100%; height: 340px; }
+  .nota {
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+    background: #f1f0fb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 8px 0 16px;
+  }
+  .nota strong { color: var(--texto); }
+
+  table.outliers { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 18px; }
+  table.outliers th, table.outliers td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--borda); }
+  table.outliers th { color: var(--texto-suave); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+  .badge.moderado { background: #fff3e0; color: #e17055; }
+  .badge.extremo { background: #ffe3e3; color: #d63031; }
+
+  footer.rodape {
+    color: var(--texto-suave);
+    font-size: 0.82rem;
+    text-align: center;
+    margin-top: 24px;
+    line-height: 1.6;
+  }
+  footer.rodape a { color: var(--com-ia); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topo">
+    <h1>Lab02: Assistente de IA vs. codificação manual</h1>
+    <p id="subtitulo-topo"></p>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section class="painel">
+    <h2>RQ1 · Tempo (time-to-green)</h2>
+    <div class="subtitulo" id="rq1-subtitulo"></div>
+    <div class="graficos-par">
+      <div class="grafico" id="chart-box-tempo_seg"></div>
+      <div class="grafico" id="chart-slope-tempo_seg"></div>
+    </div>
+  </section>
+
+  <section class="painel">
+    <h2>RQ2 · Defeitos</h2>
+    <div class="subtitulo" id="rq2-texto"></div>
+  </section>
+
+  <section class="painel">
+    <h2>RQ3 · Estrutura do código</h2>
+    <div class="subtitulo" id="rq3-subtitulo"></div>
+    <div class="graficos-par">
+      <div class="grafico" id="chart-box-cc_media"></div>
+      <div class="grafico" id="chart-slope-cc_media"></div>
+    </div>
+    <div class="nota" id="rq3-duplicacao"></div>
+  </section>
+
+  <section class="painel">
+    <h2>Conformidade de estilo (exploratória)</h2>
+    <div class="subtitulo">LOC e violações de estilo (PMD), não é a RQ3 formal.</div>
+    <div class="graficos-par">
+      <div class="grafico" id="chart-box-loc_total"></div>
+      <div class="grafico" id="chart-slope-loc_total"></div>
+    </div>
+    <div class="nota" id="loc-nota"></div>
+    <div class="graficos-par">
+      <div class="grafico" id="chart-box-violacoes_por_100loc"></div>
+      <div class="grafico" id="chart-slope-violacoes_por_100loc"></div>
+    </div>
+  </section>
+
+  <section class="painel">
+    <h2>Segurança (exploratória)</h2>
+    <div class="subtitulo" id="seguranca-texto"></div>
+  </section>
+
+  <section class="painel">
+    <h2>Outliers revisados</h2>
+    <div class="subtitulo">Cercas de Tukey (1,5x/3x IQR) sobre o dataset consolidado — ver HIPOTESES.md.</div>
+    <table class="outliers" id="tabela-outliers"></table>
+  </section>
+
+  <footer class="rodape">
+    Amostra pequena (N=18) — magnitudes de efeito são indicativas, não conclusivas.
+    Fonte completa: <a href="../HIPOTESES.md">HIPOTESES.md</a> e
+    <a href="../DESENHO_EXPERIMENTO.md">DESENHO_EXPERIMENTO.md</a>.
+  </footer>
+
+</div>
+
+<script>
+const DADOS = {"n_trials": 18, "n_com_ia": 9, "n_sem_ia": 9, "n_nao_sucesso": 0, "n_falhas": 0, "vulns_total": 0, "duplicacao_max": 0.0, "boxplots": {"tempo_seg": {"chave": "tempo_seg", "rotulo": "Tempo (time-to-green)", "unidade": "s", "boxes": {"com_ia": [25.3, 175.7, 206.5, 381.0, 501.0], "sem_ia": [270.9, 636.3, 861.9, 1210.5, 1506.6]}, "pontos": {"com_ia": [{"trial_id": "trial-arthur-02-elevador-do-predio-com_ia", "kata": "elevador-do-predio", "valor": 99.0}, {"trial_id": "trial-arthur-04-fila-do-caixa-com_ia", "kata": "fila-do-caixa", "valor": 175.7}, {"trial_id": "trial-arthur-06-blocos-aninhados-com_ia", "kata": "blocos-aninhados", "valor": 25.3}, {"trial_id": "trial-felipe-02-etiquetas-de-preco-com_ia", "kata": "etiquetas-de-preco", "valor": 204.0}, {"trial_id": "trial-felipe-04-estoque-do-deposito-com_ia", "kata": "estoque-do-deposito", "valor": 206.5}, {"trial_id": "trial-felipe-06-cofre-de-senhas-com_ia", "kata": "cofre-de-senhas", "valor": 287.2}, {"trial_id": "trial-gabriel-01-etiquetas-de-preco-com_ia", "kata": "etiquetas-de-preco", "valor": 425.9}, {"trial_id": "trial-gabriel-03-estoque-do-deposito-com_ia", "kata": "estoque-do-deposito", "valor": 381.0}, {"trial_id": "trial-gabriel-05-cofre-de-senhas-com_ia", "kata": "cofre-de-senhas", "valor": 501.0}], "sem_ia": [{"trial_id": "trial-arthur-01-cofre-de-senhas-sem_ia", "kata": "cofre-de-senhas", "valor": 636.3}, {"trial_id": "trial-arthur-03-etiquetas-de-preco-sem_ia", "kata": "etiquetas-de-preco", "valor": 386.6}, {"trial_id": "trial-arthur-05-estoque-do-deposito-sem_ia", "kata": "estoque-do-deposito", "valor": 270.9}, {"trial_id": "trial-felipe-01-elevador-do-predio-sem_ia", "kata": "elevador-do-predio", "valor": 1414.8}, {"trial_id": "trial-felipe-03-fila-do-caixa-sem_ia", "kata": "fila-do-caixa", "valor": 1210.5}, {"trial_id": "trial-felipe-05-blocos-aninhados-sem_ia", "kata": "blocos-aninhados", "valor": 1202.0}, {"trial_id": "trial-gabriel-02-fila-do-caixa-sem_ia", "kata": "fila-do-caixa", "valor": 713.1}, {"trial_id": "trial-gabriel-04-blocos-aninhados-sem_ia", "kata": "blocos-aninhados", "valor": 1506.6}, {"trial_id": "trial-gabriel-06-elevador-do-predio-sem_ia", "kata": "elevador-do-predio", "valor": 861.9}]}}, "cc_media": {"chave": "cc_media", "rotulo": "Complexidade ciclomática média", "unidade": "", "boxes": {"com_ia": [6.0, 7.0, 8.33, 9.0, 9.5], "sem_ia": [6.75, 8.0, 9.0, 9.0, 10.0]}, "pontos": {"com_ia": [{"trial_id": "trial-arthur-02-elevador-do-predio-com_ia", "kata": "elevador-do-predio", "valor": 8.0}, {"trial_id": "trial-arthur-04-fila-do-caixa-com_ia", "kata": "fila-do-caixa", "valor": 6.0}, {"trial_id": "trial-arthur-06-blocos-aninhados-com_ia", "kata": "blocos-aninhados", "valor": 9.5}, {"trial_id": "trial-felipe-02-etiquetas-de-preco-com_ia", "kata": "etiquetas-de-preco", "valor": 9.0}, {"trial_id": "trial-felipe-04-estoque-do-deposito-com_ia", "kata": "estoque-do-deposito", "valor": 7.0}, {"trial_id": "trial-felipe-06-cofre-de-senhas-com_ia", "kata": "cofre-de-senhas", "valor": 8.33}, {"trial_id": "trial-gabriel-01-etiquetas-de-preco-com_ia", "kata": "etiquetas-de-preco", "valor": 9.0}, {"trial_id": "trial-gabriel-03-estoque-do-deposito-com_ia", "kata": "estoque-do-deposito", "valor": 7.0}, {"trial_id": "trial-gabriel-05-cofre-de-senhas-com_ia", "kata": "cofre-de-senhas", "valor": 8.33}], "sem_ia": [{"trial_id": "trial-arthur-01-cofre-de-senhas-sem_ia", "kata": "cofre-de-senhas", "valor": 6.75}, {"trial_id": "trial-arthur-03-etiquetas-de-preco-sem_ia", "kata": "etiquetas-de-preco", "valor": 9.0}, {"trial_id": "trial-arthur-05-estoque-do-deposito-sem_ia", "kata": "estoque-do-deposito", "valor": 8.0}, {"trial_id": "trial-felipe-01-elevador-do-predio-sem_ia", "kata": "elevador-do-predio", "valor": 9.0}, {"trial_id": "trial-felipe-03-fila-do-caixa-sem_ia", "kata": "fila-do-caixa", "valor": 9.0}, {"trial_id": "trial-felipe-05-blocos-aninhados-sem_ia", "kata": "blocos-aninhados", "valor": 9.0}, {"trial_id": "trial-gabriel-02-fila-do-caixa-sem_ia", "kata": "fila-do-caixa", "valor": 7.0}, {"trial_id": "trial-gabriel-04-blocos-aninhados-sem_ia", "kata": "blocos-aninhados", "valor": 10.0}, {"trial_id": "trial-gabriel-06-elevador-do-predio-sem_ia", "kata": "elevador-do-predio", "valor": 9.0}]}}, "loc_total": {"chave": "loc_total", "rotulo": "LOC (verbosidade)", "unidade": "linhas", "boxes": {"com_ia": [24.0, 28.0, 41.0, 44.0, 79.0], "sem_ia": [25.0, 28.0, 31.0, 42.0, 118.0]}, "pontos": {"com_ia": [{"trial_id": "trial-arthur-02-elevador-do-predio-com_ia", "kata": "elevador-do-predio", "valor": 24.0}, {"trial_id": "trial-arthur-04-fila-do-caixa-com_ia", "kata": "fila-do-caixa", "valor": 27.0}, {"trial_id": "trial-arthur-06-blocos-aninhados-com_ia", "kata": "blocos-aninhados", "valor": 28.0}, {"trial_id": "trial-felipe-02-etiquetas-de-preco-com_ia", "kata": "etiquetas-de-preco", "valor": 41.0}, {"trial_id": "trial-felipe-04-estoque-do-deposito-com_ia", "kata": "estoque-do-deposito", "valor": 44.0}, {"trial_id": "trial-felipe-06-cofre-de-senhas-com_ia", "kata": "cofre-de-senhas", "valor": 65.0}, {"trial_id": "trial-gabriel-01-etiquetas-de-preco-com_ia", "kata": "etiquetas-de-preco", "valor": 41.0}, {"trial_id": "trial-gabriel-03-estoque-do-deposito-com_ia", "kata": "estoque-do-deposito", "valor": 42.0}, {"trial_id": "trial-gabriel-05-cofre-de-senhas-com_ia", "kata": "cofre-de-senhas", "valor": 79.0}], "sem_ia": [{"trial_id": "trial-arthur-01-cofre-de-senhas-sem_ia", "kata": "cofre-de-senhas", "valor": 118.0}, {"trial_id": "trial-arthur-03-etiquetas-de-preco-sem_ia", "kata": "etiquetas-de-preco", "valor": 46.0}, {"trial_id": "trial-arthur-05-estoque-do-deposito-sem_ia", "kata": "estoque-do-deposito", "valor": 42.0}, {"trial_id": "trial-felipe-01-elevador-do-predio-sem_ia", "kata": "elevador-do-predio", "valor": 28.0}, {"trial_id": "trial-felipe-03-fila-do-caixa-sem_ia", "kata": "fila-do-caixa", "valor": 31.0}, {"trial_id": "trial-felipe-05-blocos-aninhados-sem_ia", "kata": "blocos-aninhados", "valor": 25.0}, {"trial_id": "trial-gabriel-02-fila-do-caixa-sem_ia", "kata": "fila-do-caixa", "valor": 28.0}, {"trial_id": "trial-gabriel-04-blocos-aninhados-sem_ia", "kata": "blocos-aninhados", "valor": 31.0}, {"trial_id": "trial-gabriel-06-elevador-do-predio-sem_ia", "kata": "elevador-do-predio", "valor": 26.0}]}}, "violacoes_por_100loc": {"chave": "violacoes_por_100loc", "rotulo": "Violações de estilo por 100 LOC", "unidade": "", "boxes": {"com_ia": [17.07, 21.95, 27.27, 29.63, 35.71], "sem_ia": [13.04, 19.23, 22.58, 36.0, 38.71]}, "pontos": {"com_ia": [{"trial_id": "trial-arthur-02-elevador-do-predio-com_ia", "kata": "elevador-do-predio", "valor": 25.0}, {"trial_id": "trial-arthur-04-fila-do-caixa-com_ia", "kata": "fila-do-caixa", "valor": 29.63}, {"trial_id": "trial-arthur-06-blocos-aninhados-com_ia", "kata": "blocos-aninhados", "valor": 35.71}, {"trial_id": "trial-felipe-02-etiquetas-de-preco-com_ia", "kata": "etiquetas-de-preco", "valor": 21.95}, {"trial_id": "trial-felipe-04-estoque-do-deposito-com_ia", "kata": "estoque-do-deposito", "valor": 27.27}, {"trial_id": "trial-felipe-06-cofre-de-senhas-com_ia", "kata": "cofre-de-senhas", "valor": 32.31}, {"trial_id": "trial-gabriel-01-etiquetas-de-preco-com_ia", "kata": "etiquetas-de-preco", "valor": 17.07}, {"trial_id": "trial-gabriel-03-estoque-do-deposito-com_ia", "kata": "estoque-do-deposito", "valor": 28.57}, {"trial_id": "trial-gabriel-05-cofre-de-senhas-com_ia", "kata": "cofre-de-senhas", "valor": 18.99}], "sem_ia": [{"trial_id": "trial-arthur-01-cofre-de-senhas-sem_ia", "kata": "cofre-de-senhas", "valor": 16.1}, {"trial_id": "trial-arthur-03-etiquetas-de-preco-sem_ia", "kata": "etiquetas-de-preco", "valor": 13.04}, {"trial_id": "trial-arthur-05-estoque-do-deposito-sem_ia", "kata": "estoque-do-deposito", "valor": 38.1}, {"trial_id": "trial-felipe-01-elevador-do-predio-sem_ia", "kata": "elevador-do-predio", "valor": 21.43}, {"trial_id": "trial-felipe-03-fila-do-caixa-sem_ia", "kata": "fila-do-caixa", "valor": 22.58}, {"trial_id": "trial-felipe-05-blocos-aninhados-sem_ia", "kata": "blocos-aninhados", "valor": 36.0}, {"trial_id": "trial-gabriel-02-fila-do-caixa-sem_ia", "kata": "fila-do-caixa", "valor": 28.57}, {"trial_id": "trial-gabriel-04-blocos-aninhados-sem_ia", "kata": "blocos-aninhados", "valor": 38.71}, {"trial_id": "trial-gabriel-06-elevador-do-predio-sem_ia", "kata": "elevador-do-predio", "valor": 19.23}]}}}, "slopes": {"tempo_seg": [{"kata": "blocos-aninhados", "com_ia": 25.3, "sem_ia": 1354.3}, {"kata": "cofre-de-senhas", "com_ia": 394.1, "sem_ia": 636.3}, {"kata": "elevador-do-predio", "com_ia": 99.0, "sem_ia": 1138.35}, {"kata": "estoque-do-deposito", "com_ia": 293.75, "sem_ia": 270.9}, {"kata": "etiquetas-de-preco", "com_ia": 314.95, "sem_ia": 386.6}, {"kata": "fila-do-caixa", "com_ia": 175.7, "sem_ia": 961.8}], "cc_media": [{"kata": "blocos-aninhados", "com_ia": 9.5, "sem_ia": 9.5}, {"kata": "cofre-de-senhas", "com_ia": 8.33, "sem_ia": 6.75}, {"kata": "elevador-do-predio", "com_ia": 8.0, "sem_ia": 9.0}, {"kata": "estoque-do-deposito", "com_ia": 7.0, "sem_ia": 8.0}, {"kata": "etiquetas-de-preco", "com_ia": 9.0, "sem_ia": 9.0}, {"kata": "fila-do-caixa", "com_ia": 6.0, "sem_ia": 8.0}], "loc_total": [{"kata": "blocos-aninhados", "com_ia": 28.0, "sem_ia": 28.0}, {"kata": "cofre-de-senhas", "com_ia": 72.0, "sem_ia": 118.0}, {"kata": "elevador-do-predio", "com_ia": 24.0, "sem_ia": 27.0}, {"kata": "estoque-do-deposito", "com_ia": 43.0, "sem_ia": 42.0}, {"kata": "etiquetas-de-preco", "com_ia": 41.0, "sem_ia": 46.0}, {"kata": "fila-do-caixa", "com_ia": 27.0, "sem_ia": 29.5}], "violacoes_por_100loc": [{"kata": "blocos-aninhados", "com_ia": 35.71, "sem_ia": 37.355}, {"kata": "cofre-de-senhas", "com_ia": 25.65, "sem_ia": 16.1}, {"kata": "elevador-do-predio", "com_ia": 25.0, "sem_ia": 20.33}, {"kata": "estoque-do-deposito", "com_ia": 27.92, "sem_ia": 38.1}, {"kata": "etiquetas-de-preco", "com_ia": 19.51, "sem_ia": 13.04}, {"kata": "fila-do-caixa", "com_ia": 29.63, "sem_ia": 25.575}]}, "estatisticas": {"tempo_seg": {"mediana_com_ia": 206.5, "mediana_sem_ia": 861.9, "mannwhitney_p": 0.0012, "cliffs_delta": -0.8519, "cliffs_delta_interpretacao": "grande", "wilcoxon_kata_r": -0.9048, "wilcoxon_kata_r_interpretacao": "grande"}, "cc_media": {"mediana_com_ia": 8.33, "mediana_sem_ia": 9.0, "mannwhitney_p": 0.3768, "cliffs_delta": -0.2469, "cliffs_delta_interpretacao": "pequeno", "wilcoxon_kata_r": -0.4, "wilcoxon_kata_r_interpretacao": "medio"}, "loc_total": {"mediana_com_ia": 41.0, "mediana_sem_ia": 31.0, "mannwhitney_p": 0.6238, "cliffs_delta": 0.1481, "cliffs_delta_interpretacao": "pequeno", "wilcoxon_kata_r": -0.8667, "wilcoxon_kata_r_interpretacao": "grande"}, "violacoes_por_100loc": {"mediana_com_ia": 27.27, "mediana_sem_ia": 22.58, "mannwhitney_p": 0.9497, "cliffs_delta": 0.0247, "cliffs_delta_interpretacao": "negligivel", "wilcoxon_kata_r": 0.3333, "wilcoxon_kata_r_interpretacao": "medio"}}, "outliers_destaque": ["trial-arthur-01-cofre-de-senhas-sem_ia", "trial-gabriel-05-cofre-de-senhas-com_ia"], "outliers_tabela": [{"trial_id": "trial-arthur-01-cofre-de-senhas-sem_ia", "kata": "cofre-de-senhas", "treatment": "sem_ia", "integrante": "arthur", "metrica": "loc_total", "valor": "118.0", "q1": "28.0", "q3": "43.5", "cerca_inferior": "4.75", "cerca_superior": "66.75", "classificacao": "outlier_extremo"}, {"trial_id": "trial-gabriel-05-cofre-de-senhas-com_ia", "kata": "cofre-de-senhas", "treatment": "com_ia", "integrante": "gabriel", "metrica": "loc_total", "valor": "79.0", "q1": "28.0", "q3": "43.5", "cerca_inferior": "4.75", "cerca_superior": "66.75", "classificacao": "outlier_moderado"}]};
+const CORES = { com_ia: "#6c5ce7", sem_ia: "#00b894" };
+const ROTULO_TRAT = { com_ia: "Com IA", sem_ia: "Sem IA" };
+
+function fmt(v, casas = 2) {
+  if (v === null || v === undefined) return "n/a";
+  return Number(v).toLocaleString("pt-BR", { maximumFractionDigits: casas });
+}
+
+document.getElementById("subtitulo-topo").textContent =
+  `${DADOS.n_trials} trials (${DADOS.n_com_ia} com IA, ${DADOS.n_sem_ia} sem IA) · 3 integrantes × 6 katas`;
+
+function kpiCard(titulo, valor, detalhe) {
+  const div = document.createElement("div");
+  div.className = "kpi";
+  div.innerHTML = `<h3>${titulo}</h3><div class="valor">${valor}</div><div class="detalhe">${detalhe}</div>`;
+  return div;
+}
+
+const kpisEl = document.getElementById("kpis");
+const et = DADOS.estatisticas.tempo_seg;
+kpisEl.appendChild(kpiCard(
+  "RQ1 · Tempo",
+  `${fmt(et.mediana_com_ia, 0)}s | ${fmt(et.mediana_sem_ia, 0)}s`,
+  `p=${fmt(et.mannwhitney_p, 3)} · Cliff's delta=${fmt(et.cliffs_delta, 2)} (${et.cliffs_delta_interpretacao})`
+));
+kpisEl.appendChild(kpiCard(
+  "RQ2 · Sucesso",
+  DADOS.n_nao_sucesso === 0 ? "100%" : `${fmt(100 * (DADOS.n_trials - DADOS.n_nao_sucesso) / DADOS.n_trials, 0)}%`,
+  DADOS.n_nao_sucesso === 0 ? "sem variância em nenhum dos 18 trials" : `${DADOS.n_nao_sucesso} trial(s) sem sucesso`
+));
+const ec = DADOS.estatisticas.cc_media;
+kpisEl.appendChild(kpiCard(
+  "RQ3 · Complexidade",
+  `${fmt(ec.mediana_com_ia, 2)} | ${fmt(ec.mediana_sem_ia, 2)}`,
+  `p=${fmt(ec.mannwhitney_p, 3)} · Cliff's delta=${fmt(ec.cliffs_delta, 2)} (${ec.cliffs_delta_interpretacao})`
+));
+kpisEl.appendChild(kpiCard(
+  "Segurança",
+  DADOS.vulns_total === 0 ? "0 achados" : String(DADOS.vulns_total),
+  "Semgrep, ferramenta validada com caso sintético"
+));
+
+document.getElementById("rq1-subtitulo").textContent =
+  "Boxplot bruto (9 vs 9) e média por kata ligando com_ia a sem_ia (mesma base do teste pareado).";
+document.getElementById("rq2-texto").innerHTML =
+  DADOS.n_nao_sucesso === 0
+    ? `<strong>100% de sucesso</strong> nos ${DADOS.n_trials} trials (nenhum teste falhando ao final do time-box) — sem variância para comparar, por isso sem boxplot aqui (um boxplot de valor constante não informa nada).`
+    : `${DADOS.n_nao_sucesso} de ${DADOS.n_trials} trials sem sucesso — ver time_results.csv.`;
+document.getElementById("rq3-subtitulo").textContent =
+  "Complexidade ciclomática média (CK), boxplot bruto e média por kata.";
+document.getElementById("rq3-duplicacao").innerHTML =
+  `<strong>Duplicação de código</strong>: ${fmt(DADOS.duplicacao_max, 1)}% no máximo entre os ${DADOS.n_trials} trials (0% na maioria) — sem variância suficiente para um teste ou gráfico informativo.`;
+document.getElementById("seguranca-texto").innerHTML =
+  DADOS.vulns_total === 0
+    ? "<strong>0 vulnerabilidades</strong> detectadas pelo Semgrep em nenhum dos trials — validado com um caso sintético (a ferramenta funciona, o código dos katas é que não tem a superfície de ataque que ela cobre)."
+    : `${DADOS.vulns_total} achado(s) — ver security_results.csv.`;
+
+const el = DADOS.estatisticas.loc_total;
+document.getElementById("loc-nota").innerHTML =
+  `<strong>Atenção ao sinal</strong>: o Wilcoxon pareado por kata (r=${fmt(el.wilcoxon_kata_r, 2)}, ${el.wilcoxon_kata_r_interpretacao}) e o Mann-Whitney bruto (delta=${fmt(el.cliffs_delta, 2)}, ${el.cliffs_delta_interpretacao}) discordam de sinal para LOC — é confundimento pelo tamanho do kata (Cofre de Senhas é maior que os outros), não inconsistência. Pontos destacados: ${DADOS.outliers_destaque.join(", ") || "nenhum"}. Ver HIPOTESES.md.`;
+
+function montarBoxplot(elId, spec) {
+  const chart = echarts.init(document.getElementById(elId));
+  const categorias = ["com_ia", "sem_ia"];
+  chart.setOption({
+    title: { text: spec.rotulo + (spec.unidade ? ` (${spec.unidade})` : ""), left: "center", textStyle: { fontSize: 13 } },
+    toolbox: { feature: { saveAsImage: {} }, right: 8, top: 4 },
+    grid: { left: 50, right: 20, top: 46, bottom: 30 },
+    xAxis: { type: "category", data: categorias.map(c => ROTULO_TRAT[c]) },
+    yAxis: { type: "value", name: spec.unidade || "" },
+    series: [{
+      type: "boxplot",
+      data: categorias.map(c => spec.boxes[c]),
+      itemStyle: { color: "#eef0ff", borderColor: "#6c5ce7" },
+    }],
+  });
+  return chart;
+}
+
+function montarSlope(elId, pares, rotulo) {
+  const chart = echarts.init(document.getElementById(elId));
+  const cores = ["#6c5ce7", "#00b894", "#fdcb6e", "#e17055", "#0984e3", "#d63031"];
+  chart.setOption({
+    title: { text: rotulo + " por kata (média)", left: "center", textStyle: { fontSize: 13 } },
+    toolbox: { feature: { saveAsImage: {} }, right: 8, top: 4 },
+    grid: { left: 50, right: 110, top: 46, bottom: 30 },
+    tooltip: { trigger: "item" },
+    legend: { show: false },
+    xAxis: { type: "category", data: ["Com IA", "Sem IA"], boundaryGap: false },
+    yAxis: { type: "value" },
+    series: pares.map((p, i) => ({
+      name: p.kata,
+      type: "line",
+      symbolSize: 7,
+      data: [p.com_ia, p.sem_ia],
+      lineStyle: { color: cores[i % cores.length] },
+      itemStyle: { color: cores[i % cores.length] },
+      endLabel: { show: true, formatter: p.kata, fontSize: 10 },
+    })),
+  });
+  return chart;
+}
+
+["tempo_seg", "cc_media", "loc_total", "violacoes_por_100loc"].forEach(chave => {
+  montarBoxplot(`chart-box-${chave}`, DADOS.boxplots[chave]);
+  montarSlope(`chart-slope-${chave}`, DADOS.slopes[chave], DADOS.boxplots[chave].rotulo);
+});
+
+const tabela = document.getElementById("tabela-outliers");
+if (DADOS.outliers_tabela.length === 0) {
+  tabela.outerHTML = "<p>Nenhum outlier fora da cerca moderada (1,5x IQR) em nenhuma métrica.</p>";
+} else {
+  const linhas = DADOS.outliers_tabela.map(o => `
+    <tr>
+      <td>${o.trial_id}</td>
+      <td>${o.kata}</td>
+      <td>${ROTULO_TRAT[o.treatment] || o.treatment}</td>
+      <td>${o.metrica}</td>
+      <td>${o.valor}</td>
+      <td><span class="badge ${o.classificacao.includes('extremo') ? 'extremo' : 'moderado'}">${o.classificacao.replace('outlier_', '')}</span></td>
+    </tr>`).join("");
+  tabela.innerHTML = `
+    <thead><tr><th>Trial</th><th>Kata</th><th>Tratamento</th><th>Métrica</th><th>Valor</th><th>Classificação</th></tr></thead>
+    <tbody>${linhas}</tbody>`;
+}
+
+window.addEventListener("resize", () => {
+  document.querySelectorAll(".grafico").forEach(el => {
+    const inst = echarts.getInstanceByDom(el);
+    if (inst) inst.resize();
+  });
+});
+</script>
+</body>
+</html>
