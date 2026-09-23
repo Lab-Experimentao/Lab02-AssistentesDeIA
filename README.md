@@ -159,11 +159,12 @@ scripts/lint_trials.sh              # PMD codestyle -> results/lint_results.csv
 scripts/security_scan.sh [ruleset]  # Semgrep (p/java por padrao) -> results/security_results.csv
 scripts/analise_rq1_rq2.sh          # Wilcoxon+r pareado por kata (RQ1 tempo, RQ2 taxa de sucesso/testes falhando) -> results/analise_rq1_rq2.csv
 scripts/tamanho_efeito_rq1_rq3.sh   # Wilcoxon+r / Mann-Whitney+Cliff's delta (RQ1 tempo, RQ3 cc_media/duplicacao) -> results/tamanho_efeito_rq1_rq3.csv
+scripts/normalizacao_estrutura_loc.sh  # complexidade ciclomatica por 100 LOC e duplicacao (RQ3) -> results/estrutura_normalizada_comparacao.csv
 scripts/outliers.sh                 # cercas de Tukey (1,5x/3x IQR) sobre o dataset consolidado -> results/outliers.csv
 scripts/build_dashboard.sh          # dashboard HTML (boxplots + slope charts) -> results/dashboard.html, NAO precisa de Docker
 ```
 
-As cinco primeiras comparam ou revisam `com_ia` vs `sem_ia` (mediana/IQR, e algumas
+As seis primeiras comparam ou revisam `com_ia` vs `sem_ia` (mediana/IQR, e algumas
 tambem p-valor e tamanho de efeito) no resumo impresso ao final. Detalhes, colunas
 de cada CSV e o aviso sobre reprodutibilidade do ruleset do Semgrep em
 [SETUP.md](SETUP.md#7-analises-pos-hoc-estilo-e-seguranca); a justificativa
@@ -173,7 +174,7 @@ vem cada medida e a ressalva sobre N pequeno) em
 A ressalva sobre RQ2 ter variancia zero nos 18 trials coletados, e o Wilcoxon
 ficar degenerado por causa disso, tambem esta em HIPOTESES.md.
 
-`scripts/build_dashboard.sh` é diferente das outras cinco: não roda testes
+`scripts/build_dashboard.sh` é diferente das outras seis: não roda testes
 estatísticos novos, só reorganiza o que as outras já calcularam (boxplots +
 gráfico de linha por kata, KPIs, tabela de outliers) num `results/dashboard.html`
 autocontido (Apache ECharts via CDN), pronto para abrir no navegador e
@@ -206,6 +207,7 @@ scripts/security_scan.sh   analise pos-hoc de seguranca (Semgrep) de todos os tr
 scripts/stats_utils.py     postos/Wilcoxon/Mann-Whitney exatos e tamanho de efeito, usado pelos scripts acima
 scripts/analise_rq1_rq2.sh  mediana/IQR e Wilcoxon+r pareado por kata para RQ1 (tempo) e RQ2 (taxa de sucesso/testes falhando)
 scripts/tamanho_efeito_rq1_rq3.sh  Wilcoxon+r e Mann-Whitney+Cliff's delta para RQ1 (tempo) e RQ3 (cc_media/duplicacao)
+scripts/normalizacao_estrutura_loc.sh  complexidade ciclomatica por 100 LOC e duplicacao (RQ3), mesma bateria estatistica
 scripts/outliers.sh        identifica outliers no dataset consolidado (cercas de Tukey)
 scripts/build_dashboard.sh  gera o dashboard HTML (boxplots + slope charts), sem Docker
 katas/<kata>/              enunciado, solucao de referencia e testes de cada kata

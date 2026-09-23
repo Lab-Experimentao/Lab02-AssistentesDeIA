@@ -43,6 +43,7 @@ COPY scripts/normalizacao_estilo_loc.py /opt/normalizacao_estilo_loc.py
 COPY scripts/tamanho_efeito_rq1_rq3.py /opt/tamanho_efeito_rq1_rq3.py
 COPY scripts/outliers.py /opt/outliers.py
 COPY scripts/analise_rq1_rq2.py /opt/analise_rq1_rq2.py
+COPY scripts/normalizacao_estrutura_loc.py /opt/normalizacao_estrutura_loc.py
 
 # Padrao lido pelos scripts; docker run so passa os argumentos de negocio.
 ENV CK_JAR=/opt/ck.jar

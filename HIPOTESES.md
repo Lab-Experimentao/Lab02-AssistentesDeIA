@@ -127,6 +127,27 @@ duplicação) não difere entre o código produzido `com_ia` e `sem_ia`.
 **H1₃**: a mediana da complexidade ciclomática média (e/ou da % de
 duplicação) é diferente entre o código produzido `com_ia` e `sem_ia`.
 
+### Complexidade normalizada por LOC, resultado real (RQ3)
+
+`cc_media` já normaliza por número de métodos, não por LOC, então um trial
+com poucos métodos grandes e um com muitos métodos pequenos podem ter a
+mesma `cc_media` e complexidades bem diferentes por linha de código.
+`duplicacao_pct` já é normalizado por LOC, linhas duplicadas dividido pelo
+total. Complexidade total por 100 LOC entra aqui só para comparar as duas
+metricas na mesma base
+([scripts/normalizacao_estrutura_loc.sh](scripts/normalizacao_estrutura_loc.sh),
+`results/estrutura_normalizada_comparacao.csv`):
+
+| Métrica | Mediana com_ia \| sem_ia | Wilcoxon p | r rank-biserial | Mann-Whitney p | Cliff's delta |
+| --- | --- | --- | --- | --- | --- |
+| Complexidade por 100 LOC | 22,22 \| 29,03 | 0,688 | 0,24 (pequeno) | 0,588 | -0,16 (pequeno) |
+| Duplicação (%) | 0 \| 0 | n/a | n/a | 1,000 | 0,0 (negligível) |
+
+Complexidade por 100 LOC ficou menor em `com_ia`, mas o efeito é pequeno e
+nenhum dos dois testes cruza 0,05, sem indício de diferença nos 18 trials
+coletados. Duplicação sem nenhuma ocorrência em nenhum trial, dos dois
+tratamentos, o mesmo resultado nulo de sempre.
+
 ### Tamanho de efeito (complementa o p-valor de RQ1 e RQ3)
 
 Com N pequeno (18 trials), um p-valor "não significativo" pode só significar
