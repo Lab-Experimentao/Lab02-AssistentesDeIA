@@ -1,0 +1,3 @@
+metrica,mediana_com_ia,iqr_com_ia,mediana_sem_ia,iqr_sem_ia,wilcoxon_kata_W,wilcoxon_kata_n,wilcoxon_kata_p,wilcoxon_kata_r,wilcoxon_kata_r_interpretacao,mannwhitney_U,mannwhitney_p,cliffs_delta,cliffs_delta_interpretacao
+complexidade_por_100loc,22.22,11.38,29.03,11.74,13.0,6,0.6875,0.2381,pequeno,34.0,0.5884,-0.1605,pequeno
+duplicacao_pct,0.0,0.0,0.0,0.0,,0,,,n/a,40.5,1.0,0.0,negligivel

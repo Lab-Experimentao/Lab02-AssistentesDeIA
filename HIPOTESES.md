@@ -84,6 +84,31 @@ entre `com_ia` e `sem_ia`.
 **H1₂**: a mediana da taxa de sucesso dos testes de aceitação é diferente
 entre `com_ia` e `sem_ia`.
 
+### Wilcoxon pareado por kata, resultado real (RQ1 e RQ2)
+
+Mediana, IQR e teste de Wilcoxon pareado por kata (mesmo pareamento descrito
+na seção de tamanho de efeito abaixo, médias `com_ia`/`sem_ia` por kata, 6
+pares) para as duas variáveis de RQ1/RQ2
+([scripts/analise_rq1_rq2.sh](scripts/analise_rq1_rq2.sh),
+`results/analise_rq1_rq2.csv`):
+
+| Métrica | Mediana com_ia \| sem_ia | Wilcoxon p | r rank-biserial |
+| --- | --- | --- | --- |
+| RQ1: tempo (seg) | 206.5 \| 861.9 | 0.062 | -0.90 (grande) |
+| RQ2: taxa de sucesso (%) | 100 \| 100 | n/a | n/a |
+| RQ2: testes falhando | 0 \| 0 | n/a | n/a |
+
+RQ1 (tempo) tem um `r` grande, mesmo o `p` pareado por kata (n=6, teste
+exato) não cruzando 0,05, o menor `p` alcançável com apenas 6 pares é
+0,03125, então 0,062 já é o segundo menor valor possível nessa amostra; a
+versão não pareada (Mann-Whitney, 9 vs 9) do mesmo dado, na seção abaixo,
+chega a p=0,001. RQ2 fica sem teste possível, os 18 trials têm 100% de
+sucesso e zero testes falhando em todos, sem nenhuma variância entre
+tratamentos, então as diferenças pareadas por kata são todas zero e o
+Wilcoxon signed-rank fica indefinido (n=0 após remover empates em zero).
+Esse resultado nulo é o próprio achado de RQ2 até aqui, não uma falha do
+script, ver a checagem categórica na seção de outliers abaixo.
+
 ### RQ3: Estrutura do código
 
 - **Variáveis dependentes**:
@@ -101,6 +126,27 @@ entre `com_ia` e `sem_ia`.
 duplicação) não difere entre o código produzido `com_ia` e `sem_ia`.
 **H1₃**: a mediana da complexidade ciclomática média (e/ou da % de
 duplicação) é diferente entre o código produzido `com_ia` e `sem_ia`.
+
+### Complexidade normalizada por LOC, resultado real (RQ3)
+
+`cc_media` já normaliza por número de métodos, não por LOC, então um trial
+com poucos métodos grandes e um com muitos métodos pequenos podem ter a
+mesma `cc_media` e complexidades bem diferentes por linha de código.
+`duplicacao_pct` já é normalizado por LOC, linhas duplicadas dividido pelo
+total. Complexidade total por 100 LOC entra aqui só para comparar as duas
+metricas na mesma base
+([scripts/normalizacao_estrutura_loc.sh](scripts/normalizacao_estrutura_loc.sh),
+`results/estrutura_normalizada_comparacao.csv`):
+
+| Métrica | Mediana com_ia \| sem_ia | Wilcoxon p | r rank-biserial | Mann-Whitney p | Cliff's delta |
+| --- | --- | --- | --- | --- | --- |
+| Complexidade por 100 LOC | 22,22 \| 29,03 | 0,688 | 0,24 (pequeno) | 0,588 | -0,16 (pequeno) |
+| Duplicação (%) | 0 \| 0 | n/a | n/a | 1,000 | 0,0 (negligível) |
+
+Complexidade por 100 LOC ficou menor em `com_ia`, mas o efeito é pequeno e
+nenhum dos dois testes cruza 0,05, sem indício de diferença nos 18 trials
+coletados. Duplicação sem nenhuma ocorrência em nenhum trial, dos dois
+tratamentos, o mesmo resultado nulo de sempre.
 
 ### Tamanho de efeito (complementa o p-valor de RQ1 e RQ3)
 
