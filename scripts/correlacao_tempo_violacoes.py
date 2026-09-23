@@ -18,6 +18,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+from stats_utils import ranks
+
 CSV_FIELDS = ["treatment", "analise", "n", "spearman_rho", "p_unilateral", "p_bilateral"]
 MAX_N_EXATO = 10
 EPS = 1e-9
@@ -78,21 +80,6 @@ def add_relativos(trials):
         for trial in grupo:
             trial["tempo_rel"] = trial["tempo"] / media_tempo
             trial["viol_rel"] = trial["violacoes"] / media_viol
-
-
-def ranks(values):
-    ordem = sorted(range(len(values)), key=lambda i: values[i])
-    resultado = [0.0] * len(values)
-    i = 0
-    while i < len(ordem):
-        j = i
-        while j + 1 < len(ordem) and values[ordem[j + 1]] == values[ordem[i]]:
-            j += 1
-        media = (i + j) / 2 + 1
-        for k in range(i, j + 1):
-            resultado[ordem[k]] = media
-        i = j + 1
-    return resultado
 
 
 def spearman_exato(x, y):

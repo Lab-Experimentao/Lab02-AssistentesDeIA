@@ -102,6 +102,119 @@ duplicação) não difere entre o código produzido `com_ia` e `sem_ia`.
 **H1₃**: a mediana da complexidade ciclomática média (e/ou da % de
 duplicação) é diferente entre o código produzido `com_ia` e `sem_ia`.
 
+### Tamanho de efeito (complementa o p-valor de RQ1 e RQ3)
+
+Com N pequeno (18 trials), um p-valor "não significativo" pode só significar
+"não deu pra detectar", não "não tem efeito", por isso RQ1 e RQ3 passaram a
+ter, além do p-valor, uma medida do tamanho da diferença
+([scripts/tamanho_efeito_rq1_rq3.sh](scripts/tamanho_efeito_rq1_rq3.sh)).
+As duas medidas usadas não são cálculos independentes, são conversões
+diretas das estatísticas de teste já calculadas:
+
+- **r rank-biserial**, a partir do `W+` do Wilcoxon signed-rank pareado por
+  kata (6 pares, médias `com_ia`/`sem_ia` por kata, mesmo pareamento do
+  teste de estilo em [scripts/normalizacao_estilo_loc.py](scripts/normalizacao_estilo_loc.py),
+  já que não existe par literal "mesmo integrante, mesmo kata, dois
+  tratamentos" no desenho, ver [CONTRABALANCEAMENTO.md](CONTRABALANCEAMENTO.md)).
+- **Cliff's delta**, a partir do `U` do Mann-Whitney não pareado (9 `com_ia`
+  vs 9 `sem_ia`, ao nível de trial).
+- Classificação de magnitude (negligível/pequeno/médio/grande) pelos limiares
+  de Romano et al. (2006)/Vargha & Delaney (2000), válida para as duas
+  medidas (mesma escala [-1, 1]).
+
+**Resultado real, rodando sobre os 18 trials coletados**
+(`results/tamanho_efeito_rq1_rq3.csv`):
+
+| Métrica | Mediana com_ia \| sem_ia | Mann-Whitney p | Cliff's delta |
+| --- | --- | --- | --- |
+| RQ1: tempo (seg) | 206.5 \| 861.9 | **0.001** | **-0.85 (grande)** |
+| RQ3: complexidade ciclomática média | 8.33 \| 9.0 | 0.377 | -0.25 (pequeno) |
+| RQ3: duplicação (%) | 0.0 \| 0.0 | 1.000 | 0.0 (negligível) |
+
+RQ1 (tempo) tem um efeito grande e estatisticamente significativo mesmo com
+N pequeno: os trials `com_ia` foram consistentemente mais rápidos, não só
+"não contraditados pelos dados". RQ3 (complexidade) tem um efeito pequeno,
+não significativo, os dados não sustentam diferença de complexidade entre
+os tratamentos. A duplicação saiu com **0% em todos os 18 trials** (nenhum
+bloco duplicado detectado pelo PMD CPD em nenhum trial), então o teste é
+degenerado por falta de variância (mesma situação da varredura de segurança
+logo abaixo), o Wilcoxon fica `n/a` (sem diferenças não nulas para
+rankear) e o Cliff's delta sai 0/negligível, refletindo a ausência real de
+duplicação, não uma falha do teste.
+
+**Ressalva sobre N pequeno**: com 6 pares (Wilcoxon) ou 9 vs 9
+(Mann-Whitney), o valor de r/delta tem variância amostral alta, uma
+classificação "grande" aqui (caso de RQ1) é indicativa da direção e da
+magnitude observada nesta amostra, não uma conclusão populacional forte.
+Isso deve ser dito explicitamente ao lado do resultado no Relatório Final,
+não só a categoria de magnitude sozinha.
+
+A mesma dupla de medidas (r rank-biserial + Cliff's delta, com
+classificação) também foi adicionada ao teste de estilo que já existia em
+`scripts/normalizacao_estilo_loc.py` (colunas `wilcoxon_kata_r` e
+`cliffs_delta` em `results/lint_normalizado_comparacao.csv`), pela mesma
+razão.
+
+### Exploratória: conformidade de estilo (sem H0/H1 formal)
+
+A análise de conformidade com o style guide
+([scripts/lint_trials.sh](scripts/lint_trials.sh), PMD `codestyle`, e
+[scripts/normalizacao_estilo_loc.sh](scripts/normalizacao_estilo_loc.sh) para
+a comparação `com_ia` vs `sem_ia`) não é a RQ3 formal (que usa complexidade
+ciclomática e duplicação, ver acima), é uma métrica complementar, sobre
+quão bem o código segue convenções de estilo, calculada sobre o mesmo
+`src/` final de cada trial.
+
+**Resultado real, rodando sobre os 18 trials coletados**
+(`results/lint_normalizado_comparacao.csv`):
+
+| Métrica | Mediana com_ia \| sem_ia | Wilcoxon por kata (r) | Mann-Whitney (delta) |
+| --- | --- | --- | --- |
+| LOC (verbosidade) | 41 \| 31 | **r = -0,87 (grande)**, p=0,125, n=5 | delta = +0,15 (pequeno), p=0,624 |
+| Violações brutas | 10 \| 8 | r = -0,14 (negligível), p=0,844, n=6 | delta = +0,25 (pequeno), p=0,397 |
+| Violações por 100 LOC | 27,3 \| 22,6 | r = +0,33 (médio), p=0,562, n=6 | delta = +0,02 (negligível), p=0,950 |
+
+**Achado que precisa de leitura cuidadosa, não só a tabela**: para LOC, o
+Wilcoxon pareado por kata (r=-0,87, grande) e o Mann-Whitney não pareado
+(delta=+0,15, pequeno) **discordam de sinal**. Isso não é inconsistência dos
+testes, é o **tamanho do kata confundindo a comparação bruta**: os 6 katas
+têm LOC inerentemente muito diferente entre si (ex.: Cofre de Senhas tende a
+gerar bem mais código que Elevador do Prédio, independente do tratamento), e
+o contrabalanceamento não distribui os tratamentos igualmente por kata. O
+Mann-Whitney, ao juntar os 18 trials sem separar por kata, mistura "efeito
+do tratamento" com "que kata calhou de cair em qual tratamento". O Wilcoxon
+pareado por kata controla isso (compara `com_ia` com `sem_ia` dentro do
+mesmo kata) e é a leitura mais confiável aqui: **dentro do mesmo kata,
+`sem_ia` tende a produzir mais LOC que `com_ia`** (4 dos 5 katas com
+diferença não nula favorecem `sem_ia`, apesar de p=0,125 não cruzar o
+0,05, outra vez, N=5 pares é pequeno demais para conclusão forte, só
+indicativo). Nenhuma das duas leituras é "a errada", o ponto é que quem ler
+o Relatório Final precisa saber que a comparação bruta de LOC está
+confundida pelo kata, e priorizar a versão pareada.
+
+Para violações (brutas e por 100 LOC), as duas leituras concordam em
+magnitude pequena/negligível, não há evidência de diferença real de
+conformidade de estilo entre `com_ia` e `sem_ia` nesses 18 trials.
+
+**Correlação tempo × violações** ([scripts/correlacao_tempo_violacoes.sh](scripts/correlacao_tempo_violacoes.sh),
+Spearman exato, H1 unilateral "trial mais rápido tem mais violações",
+`results/correlacao_tempo_violacoes.csv`): a única correlação que cruza
+significância unilateral (0,05) é em `com_ia`, análise C (tempo e violações
+relativos à média do próprio kata): **rho=-0,594, p(rho<0)=0,049**, nos
+trials com IA, terminar mais rápido que a média do kata está associado a
+mais violações de estilo que a média do kata. Em `sem_ia`, a mesma análise
+dá rho=0,000 (nenhuma relação). As demais análises (A: tempo x violações
+brutas; B: tempo x violações por KLOC) não são significativas em nenhum dos
+dois tratamentos. Isto é: há um indício (não uma prova, N=9 por tratamento)
+de que ir mais rápido com IA tem um custo de conformidade que não aparece na
+resolução manual, coerente com um trade-off velocidade/qualidade específico
+do uso de IA, mas seria preciso mais dados para confirmar.
+
+**Ressalva sobre N pequeno**: os mesmos limites de RQ1/RQ3 valem aqui, 5-6
+pares no Wilcoxon, 9 vs 9 no Mann-Whitney e Spearman. Nenhum desses
+resultados deve ser lido como conclusivo isoladamente; são indícios que o
+Relatório Final deve reportar com essa ressalva ao lado.
+
 ### Exploratória: segurança do código (sem H0/H1 formal)
 
 A issue de "varredura de vulnerabilidades" ([scripts/security_scan.sh](scripts/security_scan.sh),

@@ -147,20 +147,26 @@ scripts/run_trial.sh <trial-id> <kata> <com_ia|sem_ia> <integrante> [min-tokens]
 
 A pasta `bin/` e gerada pelo script. O `min-tokens` e opcional, padrao 100.
 
-## Analises pos-hoc: estilo e seguranca
+## Analises pos-hoc: estilo, seguranca e inferencia
 
 Depois de coletar as metricas estaticas de todos (ou de um grupo) de trials,
-duas analises agregadas rodam sobre o conjunto inteiro de uma vez (leem
-`results/metrics_results.csv` para saber quais trials existem):
+analises agregadas rodam sobre o conjunto inteiro de uma vez (leem
+`results/metrics_results.csv`/`results/time_results.csv` para saber quais
+trials existem):
 
 ```
 scripts/lint_trials.sh              # PMD codestyle -> results/lint_results.csv
 scripts/security_scan.sh [ruleset]  # Semgrep (p/java por padrao) -> results/security_results.csv
+scripts/tamanho_efeito_rq1_rq3.sh   # Wilcoxon+r / Mann-Whitney+Cliff's delta (RQ1 tempo, RQ3 cc_media/duplicacao) -> results/tamanho_efeito_rq1_rq3.csv
 ```
 
-As duas comparam `com_ia` vs `sem_ia` (mediana/IQR) no resumo impresso ao
-final. Detalhes, colunas de cada CSV e o aviso sobre reprodutibilidade do
-ruleset do Semgrep em [SETUP.md](SETUP.md#7-analises-pos-hoc-estilo-e-seguranca).
+As tres comparam `com_ia` vs `sem_ia` (mediana/IQR, e a ultima tambem
+p-valor e tamanho de efeito) no resumo impresso ao final. Detalhes, colunas
+de cada CSV e o aviso sobre reprodutibilidade do ruleset do Semgrep em
+[SETUP.md](SETUP.md#7-analises-pos-hoc-estilo-e-seguranca); a justificativa
+estatistica do tamanho de efeito (Cliff's delta / r rank-biserial, de onde
+vem cada medida e a ressalva sobre N pequeno) em
+[HIPOTESES.md](HIPOTESES.md#tamanho-de-efeito-complementa-o-p-valor-de-rq1-e-rq3).
 
 ### Problemas comuns
 
@@ -184,6 +190,8 @@ scripts/correlacao_tempo_violacoes.sh  correlacao tempo x violacoes por tratamen
 scripts/normalizacao_estilo_loc.sh  violacoes de estilo por 100 LOC, com_ia vs sem_ia
 scripts/lint_trials.sh     analise pos-hoc de estilo (PMD codestyle) de todos os trials coletados
 scripts/security_scan.sh   analise pos-hoc de seguranca (Semgrep) de todos os trials coletados
+scripts/stats_utils.py     postos/Wilcoxon/Mann-Whitney exatos e tamanho de efeito, usado pelos scripts acima
+scripts/tamanho_efeito_rq1_rq3.sh  Wilcoxon+r e Mann-Whitney+Cliff's delta para RQ1 (tempo) e RQ3 (cc_media/duplicacao)
 katas/<kata>/              enunciado, solucao de referencia e testes de cada kata
 trials/<trial-id>/src      arquivos .java finais de cada trial (RQ3)
 trials/<trial-id>/test     testes de aceitacao (JUnit) do kata (RQ1/RQ2)
@@ -194,6 +202,7 @@ results/lint_normalizado.csv  violacoes por 100 LOC por trial
 results/lint_normalizado_comparacao.csv  testes com_ia vs sem_ia (LOC, brutas, por 100 LOC)
 results/lint_results.csv    saida acumulada da analise de estilo
 results/security_results.csv saida acumulada da varredura de seguranca
+results/tamanho_efeito_rq1_rq3.csv  Wilcoxon/Mann-Whitney + tamanho de efeito para RQ1/RQ3
 SETUP.md                   guia detalhado, inclui a alternativa sem Docker
 DESENHO_EXPERIMENTO.md     GQM, hipoteses, variaveis, tratamentos e desenho do experimento
 HIPOTESES.md               H0/H1, variaveis e ameacas a validade, detalhado
