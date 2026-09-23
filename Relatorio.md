@@ -54,51 +54,101 @@ O desenho segue o método GQM (*Goal-Question-Metric*) de Basili, Caldiera e Rom
 
 ## 3. Metodologia
 
-*ORIENTAÇÃO: Esta é a seção mais longa do relatório e a que mais evidencia o trabalho real do grupo. Ela tem seis subseções — as cinco primeiras cobrem principalmente os 70% do enunciado; a última (Inovações) é onde os 30% de contribuição própria do grupo devem ficar explícitos e fáceis de identificar na correção.*
+Esta seção descreve como o grupo executou, na prática, o desenho apresentado na seção 2: as dificuldades reais enfrentadas (3.1), as decisões metodológicas e seus trade-offs (3.2), a divisão do trabalho por sprint refletindo o board do GitHub Projects (3.3), as ferramentas usadas (3.4), a tabela RQ→métrica→definição operacional (3.5) e as seis frentes de inovação do grupo (3.6).
 
 ### 3.1 Principais Desafios
 
-*ORIENTAÇÃO: Relate as dificuldades técnicas e metodológicas reais enfrentadas pelo grupo — não uma lista de trivialidades já resolvidas, e sim decisões difíceis de fato. Exemplos típicos, conforme o laboratório: limite de taxa (rate limit) da API do GitHub ao consultar milhares de repositórios ou workflow runs (Lab01/Lab03); paginação de grandes volumes de dados; ausência de histórico de mudança de status consultável via API no GitHub Projects, exigindo snapshots manuais recorrentes (todos os laboratórios); dificuldade de padronizar katas de dificuldade equivalente e evitar memorização de soluções pela IA (Lab02); ambiguidade na definição operacional de uma métrica, como lead time (Lab03); dados incompletos ou repositórios sem GitHub Actions habilitado (Lab03).*
+**Padronizar katas de dificuldade equivalente sem risco de memorização pela IA.** Katas clássicos (LeetCode/HackerRank) correm o risco de já terem sido vistos no treinamento do Claude, o que inflaria artificialmente o ganho `com_ia` sem refletir ajuda real. O grupo optou por escrever 6 katas autorais e de baixa indexação, calibrados manualmente para ficar perto do teto do time-box de 35 min, com dois deles (Estoque do Depósito, Blocos Aninhados) deliberadamente mais difíceis detalhado em [katas/README.md](katas/README.md).
 
-*[conteúdo do grupo — substituir este texto]*
+**Reprodutibilidade do ambiente de coleta entre as três máquinas do grupo.** JDK, CK, PMD, JUnit Console e Semgrep precisavam se comportar de forma idêntica nas máquinas de todos os integrantes para que os tempos e métricas estáticas fossem comparáveis. A solução foi empacotar toda a cadeia de ferramentas numa única imagem Docker ([docker/Dockerfile](docker/Dockerfile)), com versões fixadas (ex. Semgrep `1.90.0`, CK `0.7.0`, PMD `7.7.0`).
+
+**Falha de ambiente durante a coleta real.** No trial `trial-felipe-01-elevador-do-predio-sem_ia`, o processo Java do JUnit travou a 100% de CPU por cerca de 13 minutos dentro do container, sem progresso. O trial foi abortado e reiniciado do zero antes de qualquer linha ser gravada, então o dado commitado já é da segunda tentativa, sem contaminação de tempo.
+
+**Confiar num resultado "zero" sem evidência de que o instrumento funciona.** A varredura de vulnerabilidades (Semgrep, RQ de inovação) devolveu 0 achados nos 18 trials, um resultado indistinguível, à primeira vista, de uma falha silenciosa do scanner (ex. path errado, ruleset não carregado). Antes de aceitar o zero como resultado real, o grupo validou a ferramenta contra um arquivo Java sintético com vulnerabilidades propositais (SQL montado por concatenação, uso de MD5, senha hardcoded, deserialização insegura); o Semgrep detectou corretamente os problemas plantados que o ruleset `p/java` cobre, confirmando que o zero nos trials reais reflete o código (métodos estáticos simples, sem I/O/SQL/criptografia), não uma falha do instrumento.
 
 ### 3.2 Tomadas de Decisão
 
-*ORIENTAÇÃO: Documente as decisões metodológicas do grupo e o raciocínio (trade-off) por trás de cada uma — não apenas a escolha final. Exemplos que os enunciados pedem explicitamente: o limite de WIP definido para a coluna Doing e sua justificativa (obrigatório em todo laboratório); qual assistente de IA foi usado e por quê, e como se garantiu o mesmo tratamento em todos os trials (Lab02); qual definição operacional de métrica foi adotada quando o enunciado permite variação, mantendo-a consistente para toda a amostra (ex.: lead time no Lab03); critério de inclusão/exclusão de repositórios na amostra; linguagem de programação escolhida em função da ferramenta de métricas estáticas disponível (CK exige Java; Radon para Python).*
+**Limite de WIP da coluna Doing: 3 (uma Issue por integrante do trio).** Justificativa: com um limite igual ao número de integrantes, cada pessoa mantém no máximo uma tarefa em andamento por vez, o que facilita controlar o fluxo de Issues sendo movidas de Doing para Review, evitando que várias tarefas fiquem abertas em paralelo pela mesma pessoa sem terminar nenhuma, e torna imediato perceber quando alguém está com a coluna "cheia" e precisa finalizar ou revisar antes de puxar a próxima.
 
-*[conteúdo do grupo — substituir este texto]*
+**Assistente de IA único e fixo: Claude (versão gratuita, claude.ai).** Para que o tratamento `com_ia` fosse comparável entre os três integrantes e os 9 trials com IA, o grupo fixou uma única ferramenta para todo o experimento em vez de deixar cada integrante usar o assistente de sua preferência, o que misturaria "efeito da IA" com "efeito de qual IA".
+
+**Linguagem Java, não Python/Radon.** A ferramenta de complexidade ciclomática exigida para RQ3 (CK) só analisa bytecode/fonte Java. Fixar Java evita trocar de ferramenta de métrica estática (Radon, para Python) entre integrantes ou katas, o que quebraria a comparabilidade das métricas de RQ3 dentro do experimento.
+
+**Desenho crossover within-subject com dupla contrabalanceação.** Com apenas 3 integrantes, um desenho between-subject (cada pessoa só num tratamento) deixaria a variação individual de habilidade dominar o resultado. Por isso cada integrante passa pelos dois tratamentos (3 katas `com_ia`, 3 `sem_ia`), com dois cuidados adicionais: a ordem dos katas é contrabalanceada por integrante (rotação cíclica), e o tratamento alterna a cada trial, nunca dois seguidos iguais, para não confundir fadiga/aprendizado de sessão com o efeito da IA (matriz completa em [CONTRABALANCEAMENTO.md](CONTRABALANCEAMENTO.md)).
+
+**Outlier estatístico não é excluído por padrão.** Ao revisar o dataset consolidado (cercas de Tukey), dois trials do kata Cofre de Senhas apareceram como outliers de LOC. O grupo decidiu mantê-los sem exclusão: a causa identificada foi o próprio kata (único com dois métodos, portanto inerentemente maior), não dado corrompido ou falha de ambiente. A política adotada foi excluir um outlier só havendo evidência concreta de corrupção por falha de infraestrutura, o que não é o caso aqui.
+
+**Estatística não paramétrica, com tamanho de efeito como complemento do p-valor.** Dado o N pequeno (18 trials, 9 por tratamento), o grupo seguiu mediana/IQR nas tabelas descritivas e Wilcoxon signed-rank (pareado) / Mann-Whitney U (não pareado) na análise inferencial, como recomendado no enunciado. Como contribuição adicional (seção 3.6), complementou RQ1 e RQ3 com tamanho de efeito (r rank-biserial e Cliff's delta), porque um p-valor "não significativo" com N=18 pode só indicar "não deu para detectar", não "não há efeito".
 
 ### 3.3 Etapas
 
-*ORIENTAÇÃO: Descreva o processo de desenvolvimento em sprints, seguindo a estrutura do enunciado (ex.: Lab0XS01, S02, S03 + Relatório Final), com o que foi efetivamente entregue em cada uma e quem (qual integrante) foi responsável por qual parte — a correção do professor é feita a partir do board (GitHub Projects), então a divisão aqui deve refletir os Assignees reais das Issues, não uma divisão apenas narrativa. Inclua também a subseção "Configuração do processo" exigida em todos os laboratórios: as colunas do board (mínimo Backlog → To Do → Doing → Review → Done), a política de limite de WIP em uso, e uma captura de tela (print) do board ao final do laboratório, mostrando o fluxo real de trabalho do grupo.*
+O laboratório foi dividido em três sprints (milestones `LAB02S01`, `LAB02S02`, `LAB02S03` no GitHub Projects) mais o Relatório Final. A tabela abaixo reflete os Assignees reais de cada issue no board.
 
-[Tabela ou linha do tempo com Sprint | Entregas | Responsável(is) | Issues (nº)]
+| Sprint | Entregas | Responsável | Issue (nº) |
+|---|---|---|---|
+| S01 | Ambiente e script de coleta de métricas estáticas; escolha e fixação do assistente de IA único do experimento; consolidação do Desenho do Experimento (conjunta) | Arthur Lara Panzera | #2, #5, #6 |
+| S01 | Escolha, validação e script de verificação dos katas; redação de hipóteses, variáveis e ameaças à validade; consolidação do Desenho do Experimento (conjunta) | Felipe Augusto Pereira | #3, #4, #5 |
+| S01 | Script de cronometragem e coleta de tempo (time-to-green); definição da ordem contrabalanceada por integrante; consolidação do Desenho do Experimento (conjunta) | Gabriel Reis Lebron | #1, #5, #7 |
+| S02 | Execução dos 6 trials (katas 1-6, alternando com/sem IA); consolidação dos dados brutos de todos os trials (conjunta) | Arthur Lara Panzera | #19, #21-#25, #32 |
+| S02 | Execução dos 6 trials (katas 1-6, alternando com/sem IA); levantamento dos katas restantes; varredura de vulnerabilidades no código gerado (inovação); consolidação dos dados brutos de todos os trials (conjunta) | Felipe Augusto Pereira | #13-#18, #20, #32, #37 |
+| S02 | Execução dos 6 trials (katas 1-6, alternando com/sem IA); conformidade com linter/style guide (inovação); consolidação dos dados brutos de todos os trials (conjunta) | Gabriel Reis Lebron | #26-#31, #32, #38 |
+| S03 | Análise estatística de RQ1/RQ2 (tempo e defeitos) e RQ3 (estrutura do código); Relatório: resultados; Relatório Final (conjunta) | Arthur Lara Panzera | #47, #48, #50, #53 |
+| S03 | Identificação e tratamento de outliers (inovação); dashboard de visualização (inovação); cálculo de tamanho de efeito — Cliff's delta / r de Wilcoxon (inovação); Relatório: metodologia; Relatório Final (conjunta) | Felipe Augusto Pereira | #46, #49, #50, #52, #57 |
+| S03 | Relatório: introdução e contexto e conclusão; normalização de violações de estilo por LOC (inovação); correlação entre tempo do trial e violações de estilo (inovação); Relatório Final (conjunta) | Gabriel Reis Lebron | #50, #51, #54, #55, #56 |
 
-> Sugestão: insira aqui o print do quadro Kanban (GitHub Projects) mencionado na orientação acima.
+**Distribuição de issues por integrante** (contando cada issue uma vez por Assignee):
+
+![Issues do GitHub Projects por integrante: Felipe 17, Gabriel 16, Arthur 14](results/img/issues_por_integrante.svg)
+
+#### Configuração do processo
+
+- **Colunas do board**: Backlog → To Do → Doing → Review → Done.
+- **Limite de WIP (coluna Doing)**: 3 — uma issue por integrante do trio, controlando o fluxo de Doing para Review (justificativa completa em 3.2).
+- **Print do board ao final do Lab02**: [inserir aqui a captura de tela do board]
 
 ### 3.4 Ferramentas
 
-*ORIENTAÇÃO: Liste as ferramentas usadas na coleta, processamento e análise de dados — sejam específicas (nome e versão quando relevante), não genéricas. Exemplos conforme o laboratório: GraphQL e/ou REST API do GitHub para mineração (Lab01/Lab03 — bibliotecas de terceiros para consulta à API não são permitidas, o script deve ser próprio do grupo); Python/Pandas para manipulação de dados; Matplotlib/Seaborn ou Plotly/Dash/Streamlit para visualização; CK, PMD ou Radon para métricas estáticas de código (Lab02); testes estatísticos como o de Wilcoxon para amostras pareadas (Lab02); ferramenta de BI (Power BI, Tableau, Looker Studio) caso o grupo não opte pelo dashboard em código (Lab04). Inclua também a ferramenta de processo, obrigatória em todos os laboratórios: GitHub Projects (v2), com o link do repositório/board do grupo.*
+Toda a cadeia de coleta e análise, empacotada numa imagem Docker única ([docker/Dockerfile](docker/Dockerfile)) para reprodutibilidade entre as três máquinas do grupo, exceto onde indicado:
 
-*[conteúdo do grupo — substituir este texto]*
+| Ferramenta | Versão | Função | RQ / Inovação |
+|---|---|---|---|
+| Docker | Docker Desktop (imagem própria `lab02-metrics`) | Empacota toda a cadeia de ferramentas (JDK, CK, PMD, JUnit, Semgrep) numa imagem única, para que a coleta seja reprodutível entre as três máquinas do grupo | Todas (infraestrutura) |
+| Java (Eclipse Temurin JDK) | `17` | Linguagem dos katas e runtime de compilação/execução dos trials; fixada porque o CK (RQ3) só analisa bytecode/fonte Java | Todas |
+| CK (`com.github.mauricioaniche:ck`) | `0.7.0` | Extrai complexidade ciclomática (WMC) por método e LOC do código Java final de cada trial | RQ3 |
+| PMD CPD | `7.7.0` | Mede duplicação de código (% de linhas duplicadas) sobre o código final de cada trial | RQ3 |
+| PMD `codestyle` | `7.7.0` | Conformidade com style guide, normalizada por 100 LOC (`scripts/lint_trials.py` + `scripts/normalizacao_estilo_loc.py`) | Inovação 1 |
+| Semgrep, ruleset `p/java` | `1.90.0` | Varredura de vulnerabilidades estáticas sobre o código final de cada trial (`scripts/security_scan.py`) | Inovação 3 |
+| JUnit Platform Console Standalone | `1.10.2` | Roda os testes de aceitação de cada kata; base da cronometragem do time-to-green e da contagem de testes passando/falhando | RQ1, RQ2 |
+| Python 3 | 3.x | Orquestra a coleta (`scripts/time_trial.py`, `scripts/collect_metrics.py`) e implementa Wilcoxon, Mann-Whitney, Spearman, ranks e tamanho de efeito em [scripts/stats_utils.py](scripts/stats_utils.py) (`scripts/correlacao_tempo_violacoes.py`, `scripts/tamanho_efeito_rq1_rq3.py`, `scripts/outliers.py`) | RQ1-RQ3, inovações 2, 4, 5 |
+| Apache ECharts (via CDN) | `6.1.0` | Gera o dashboard HTML autocontido (`scripts/build_dashboard.py`, boxplots + slope charts, `results/dashboard.html`), fora do Docker | Inovação 6 |
+| GitHub Projects | v2 | Ferramenta de processo do grupo — board em https://github.com/Lab-Experimentao/Lab02-AssistentesDeIA | Processo |
 
 ### 3.5 Tabela de Métricas
 
-*ORIENTAÇÃO: Construa uma tabela relacionando cada Questão de Pesquisa à métrica correspondente, sua definição operacional exata (a fórmula ou regra de cálculo — não basta o nome) e a ferramenta/fonte usada para coletá-la. Isso é o que garante que o laboratório seja reprodutível por outro grupo. A primeira linha abaixo é um exemplo ilustrativo (baseado no Lab01); substitua pelas RQs e métricas do seu laboratório.*
-
 | RQ | Métrica | Definição Operacional | Unidade | Ferramenta / Fonte |
 |---|---|---|---|---|
-| *RQ01 (exemplo)* | *Idade do repositório* | *Data atual − data de criação do repositório* | *Dias* | *Script GraphQL (API do GitHub)* |
-| | | | | |
-| | | | | |
-| | | | | |
-| | | | | |
+| RQ1 | Time-to-green | Tempo decorrido do início do trial até todos os testes de aceitação passarem; trial sem sucesso é censurado em exatamente 35 min (time-box), não descartado | Minutos (seg. no CSV) | `scripts/time_trial.py` → `results/time_results.csv` |
+| RQ2 | Taxa de sucesso dos testes | (nº de testes de aceitação passando ÷ nº total de testes do kata) × 100, ao final do time-box | % | `scripts/time_trial.py` → `results/time_results.csv` |
+| RQ2 (complementar) | Nº de testes falhando | Contagem absoluta de testes de aceitação não passando ao final do time-box | Testes | `scripts/time_trial.py` → `results/time_results.csv` |
+| RQ3 | Complexidade ciclomática média | Média do WMC (McCabe, 1976) entre todos os métodos do arquivo `.java` final do trial | Nº médio por método | CK `0.7.0` → `scripts/collect_metrics.py` → `results/metrics_results.csv` |
+| RQ3 | Duplicação de código | % de linhas duplicadas detectadas pelo PMD CPD sobre o código final do trial | % | PMD CPD `7.7.0` → `scripts/collect_metrics.py` → `results/metrics_results.csv` |
+| RQ3 (controle) | LOC | Linhas de código (excl. em branco/comentário) do arquivo final do trial | Linhas | CK `0.7.0` → `scripts/collect_metrics.py` → `results/metrics_results.csv` |
+| Inovação 1 | Violações de estilo por 100 LOC | Nº de violações PMD `codestyle` ÷ (LOC ÷ 100) | Violações/100 LOC | PMD `codestyle` → `scripts/lint_trials.py` + `scripts/normalizacao_estilo_loc.py` → `results/lint_normalizado_comparacao.csv` |
+| Inovação 2 | Correlação tempo × violações | Coeficiente de Spearman (exato) entre tempo do trial e violações de estilo, calculado separadamente dentro de `com_ia` e `sem_ia` | rho [-1, 1] | `scripts/correlacao_tempo_violacoes.py` → `results/correlacao_tempo_violacoes.csv` |
+| Inovação 3 | Achados de segurança estática | Nº de achados do Semgrep (ruleset `p/java`) sobre o código final do trial, por severidade (ERROR/WARNING/INFO) | Achados | Semgrep `1.90.0` → `scripts/security_scan.py` → `results/security_results.csv` |
+| Inovação 4 | Tamanho de efeito (RQ1 e RQ3) | r rank-biserial (a partir do `W+` do Wilcoxon pareado por kata) e Cliff's delta (a partir do `U` do Mann-Whitney não pareado), com magnitude classificada pelos limiares de Romano et al. (2006)/Vargha & Delaney (2000) | Escala [-1, 1] | `scripts/tamanho_efeito_rq1_rq3.py` → `results/tamanho_efeito_rq1_rq3.csv` |
+| Inovação 5 | Distância às cercas de Tukey | Distância de cada observação (`tempo_seg`, `loc_total`, `cc_media`, `duplicacao_pct`, `violacoes_por_100loc`) aos limites Q1−1,5×IQR/Q3+1,5×IQR (moderado) e Q1−3×IQR/Q3+3×IQR (extremo) do dataset consolidado | Múltiplos de IQR | `scripts/outliers.py` → `results/outliers.csv` |
 
 ### 3.6 Inovações Propostas pelo Grupo (30% da nota)
 
-*ORIENTAÇÃO: O enunciado do laboratório corresponde a 70% da exigência da disciplina. Os outros 30% dependem de uma contribuição original do grupo, que deve estar claramente identificada aqui — não diluída no restante do texto — para facilitar a correção. Escolha uma ou mais frentes de inovação, entre: (a) uma nova Questão de Pesquisa, além das do enunciado; (b) uma métrica ou variável adicional, não pedida no enunciado; (c) uma mudança de arquitetura/ferramenta de coleta (ex.: paralelizar a coleta, usar cache, trocar de biblioteca de visualização); (d) uma metodologia alternativa ou complementar (ex.: um teste estatístico adicional, uma segmentação diferente da amostra, uma técnica de controle de ameaça à validade não exigida pelo enunciado). Para cada inovação escolhida, explique o que foi feito, por que o grupo considerou relevante, e onde o resultado dela aparece nas seções de Resultados/Discussão e na Conclusão — inovação sem resultado discutido não conta como contribuição efetiva.*
+Além dos 70% do enunciado (RQ1-RQ3), o grupo propôs seis frentes adicionais, todas com métrica, ferramenta e H0/H1 (quando aplicável) documentadas em [HIPOTESES.md](HIPOTESES.md) e na tabela 3.5, e com resultado a ser discutido nas seções 4.2/4.3 e retomado na Conclusão:
 
-*[conteúdo do grupo — substituir este texto]*
+1. **Conformidade com style guide (PMD `codestyle`), normalizada por 100 LOC.** Motivação: RQ3 do enunciado cobre complexidade e duplicação, mas não estilo, uma dimensão de qualidade que a IA pode afetar de forma diferente (ex. gerar código mais verboso, mas nem por isso mais idiomático). Normalizar por LOC evita que katas maiores pareçam sistematicamente "menos conformes" só por terem mais código.
+2. **Correlação entre tempo do trial e violações de estilo, por tratamento.** Motivação: testar uma explicação alternativa para uma eventual diferença de conformidade, se o fator é a pressa do time-box, e não a IA em si, a correlação deveria aparecer nos dois tratamentos igualmente; se for específica de `com_ia`, sugere um trade-off velocidade/qualidade próprio do uso de IA.
+3. **Varredura de vulnerabilidades estáticas (Semgrep) sobre o código final de cada trial.** Motivação: nenhuma das RQ1-RQ3 do enunciado observa segurança; com assistentes de IA cada vez mais usados em código de produção, é uma dimensão de qualidade relevante de comparar entre `com_ia` e `sem_ia`, mesmo que os katas não tenham superfície de ataque rica.
+4. **Tamanho de efeito (r rank-biserial e Cliff's delta) para RQ1 e RQ3.** Motivação: com N=18, um p-valor "não significativo" pode só indicar poder estatístico insuficiente, não ausência de efeito; o tamanho de efeito complementa o p-valor com a magnitude e a direção da diferença observada nesta amostra.
+5. **Identificação e tratamento sistemático de outliers, via cercas de Tukey.** Motivação: o enunciado alerta para o risco de um dado discrepante (ex. censura por bug de ambiente) distorcer mediana/IQR; o grupo formalizou essa checagem em vez de tratá-la caso a caso, cobrindo as cinco métricas numéricas do dataset consolidado.
+6. **Dashboard de visualização (Apache ECharts) consolidando tempo, taxa de sucesso e métricas estáticas.** Motivação: facilitar a leitura comparativa `com_ia` vs. `sem_ia` de todas as RQs (enunciado + inovações) num único artefato navegável, em vez de gráficos estáticos isolados por questão.
 
 ## 4. Resultados
 
