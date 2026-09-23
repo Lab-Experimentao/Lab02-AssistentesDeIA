@@ -1,0 +1,4 @@
+metrica,mediana_com_ia,iqr_com_ia,mediana_sem_ia,iqr_sem_ia,wilcoxon_kata_W,wilcoxon_kata_n,wilcoxon_kata_p,wilcoxon_kata_r,wilcoxon_kata_r_interpretacao
+tempo_seg,206.5,205.3,861.9,574.2,1.0,6,0.0625,-0.9048,grande
+taxa_sucesso_pct,100.0,0.0,100.0,0.0,,0,,,n/a
+testes_falhando,0.0,0.0,0.0,0.0,,0,,,n/a
