@@ -119,9 +119,9 @@ Cada RQ recebe um boxplot pareado (`com_ia` vs `sem_ia`) e, quando aplicável, u
 ![Boxplot do tempo, time-to-green, com_ia vs sem_ia](results/graficos/rq1_tempo_boxplot.png)
 ![Tempo por kata, com_ia vs sem_ia](results/graficos/rq1_tempo_slope.png)
 
-**Resultado**: mediana do tempo até passar em todos os testes de aceitação, 206,5s em `com_ia` (IQR 205,3s) contra 861,9s em `sem_ia` (IQR 574,2s), cerca de 4,2 vezes mais rápido com IA, diferença estatisticamente significativa (Mann-Whitney p=0,001).
+**Resultado**: mediana do tempo até passar em todos os testes de aceitação, 206,5s em `com_ia` (IQR 205,3s) contra 1007,0s em `sem_ia` (IQR 348,6s), cerca de 4,9 vezes mais rápido com IA, diferença estatisticamente significativa (Mann-Whitney p<0,001).
 
-A caixa de `com_ia` fica inteira abaixo da caixa de `sem_ia`, sem nenhuma sobreposição, o padrão mais limpo de toda a seção. No gráfico por kata, 5 das 6 linhas sobem da esquerda para a direita, `com_ia` mais rápido em cada uma delas. A exceção é Estoque do Depósito, onde a média de `com_ia` fica um pouco acima da de `sem_ia` (293,75s contra 270,9s), puxada por um trial bem mais lento (381s) que pesa mais nessa média do que o outro trial `com_ia` do mesmo kata (206,5s).
+A caixa de `com_ia` fica inteira abaixo da caixa de `sem_ia`, sem nenhuma sobreposição, o padrão mais limpo de toda a seção. No gráfico por kata, as 6 linhas sobem da esquerda para a direita, sem exceção, `com_ia` mais rápido em cada um dos 6 katas.
 
 **RQ2, o uso de assistente de IA reduz a quantidade de defeitos (testes que falham) no código produzido?**
 
@@ -163,7 +163,7 @@ Violações de estilo (PMD `codestyle`) já divididas por 100 LOC, para não con
 
 ### 4.3 Discussão
 
-**RQ1, tempo**: hipótese confirmada. A mediana de tempo caiu de 861,9s (`sem_ia`) para 206,5s (`com_ia`), efeito grande em duas medidas independentes, r rank-biserial de -0,90 no Wilcoxon pareado por kata (W+=1, n=6, p=0,062) e Cliff's delta de -0,85 no Mann-Whitney não pareado (9 vs 9, p=0,001). O teste pareado por kata não cruza o 0,05 convencional, mas com apenas 6 pares o menor p alcançável por um teste exato é 0,03125, então 0,062 já é o segundo menor valor possível nessa amostra, o teste tem pouco poder com N tão baixo. A convergência das duas análises, pareada e não pareada, dá confiança de que o efeito é real e não um artefato de um único teste.
+**RQ1, tempo**: hipótese confirmada. A mediana de tempo caiu de 1007,0s (`sem_ia`) para 206,5s (`com_ia`), efeito máximo e significativo nas duas medidas, r rank-biserial de -1,0 no Wilcoxon pareado por kata (W+=0, n=6, p=0,031, o menor p alcançável com apenas 6 pares) e Cliff's delta de -1,0 no Mann-Whitney não pareado (9 vs 9, p<0,001, separação perfeita entre os dois grupos). Os 6 katas, sem exceção, tiveram `com_ia` mais rápido que `sem_ia`, a convergência das duas análises, pareada e não pareada, dá confiança de que o efeito é real e não um artefato de um único teste.
 
 **RQ2, defeitos**: hipótese nem confirmada nem refutada, sem o que testar. Os 18 trials tiveram 100% de sucesso e 0 testes falhando, `com_ia` e `sem_ia`, sem nenhuma variância entre tratamentos. Isso não significa "sem efeito", significa que os katas foram calibrados dentro da capacidade dos dois tratamentos no time-box de 35 minutos, um resultado esperado do próprio desenho do experimento, não uma falha de coleta.
 
@@ -171,7 +171,7 @@ Violações de estilo (PMD `codestyle`) já divididas por 100 LOC, para não con
 
 **Inovação, verbosidade e estilo (LOC e PMD `codestyle`)**: LOC ficou maior em `com_ia` (mediana 41 vs 31 linhas), confirmando a expectativa de maior verbosidade levantada na Introdução, com efeito grande no teste pareado (r=-0,87, p=0,125) mas não significativo no não pareado (p=0,624), o mesmo padrão de RQ1, um efeito visível que ainda não cruza 0,05 com N=18. Violações de estilo por 100 LOC ficaram um pouco maiores em `com_ia` (mediana 27,27 contra 22,58 de `sem_ia`), mas sem diferença estatística clara, o teste pareado deu efeito médio não significativo (p=0,563) e o não pareado deu efeito negligível (p=0,950). Ou seja, o código com IA saiu mais verboso, mas não claramente menos conforme ao style guide por linha.
 
-**Inovação, correlação tempo x violações**: a hipótese de que "pressa gera mais violações" não se sustentou de forma consistente, a correlação de Spearman deu sinais opostos entre os tratamentos e nenhuma passou no limiar de 0,05 bilateral (a mais próxima, `com_ia`, tempo relativo x violações relativas por kata, rho=-0,59, p=0,098), então não há evidência forte de que o tempo do trial, por si só, explique a diferença de conformidade de estilo.
+**Inovação, correlação tempo x violações**: a hipótese de que "pressa gera mais violações" não se sustentou de forma consistente, a correlação de Spearman deu sinais opostos entre os tratamentos e nenhuma passou no limiar de 0,05 bilateral (a mais próxima, `com_ia`, tempo x violações por KLOC, rho=-0,57, p=0,121), então não há evidência forte de que o tempo do trial, por si só, explique a diferença de conformidade de estilo.
 
 **Inovação, segurança (Semgrep)**: 0 vulnerabilidades encontradas nos 18 trials, `com_ia` e `sem_ia`, resultado esperado dado o escopo pequeno e a natureza dos katas, que não envolvem entrada de rede, banco de dados ou serialização, superfícies mais comuns de vulnerabilidade estática.
 
