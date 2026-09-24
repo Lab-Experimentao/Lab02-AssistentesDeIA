@@ -119,35 +119,47 @@ Cada RQ recebe um boxplot pareado (`com_ia` vs `sem_ia`) e, quando aplicável, u
 ![Boxplot do tempo, time-to-green, com_ia vs sem_ia](results/graficos/rq1_tempo_boxplot.png)
 ![Tempo por kata, com_ia vs sem_ia](results/graficos/rq1_tempo_slope.png)
 
-A caixa de `com_ia` fica inteira abaixo da caixa de `sem_ia`, sem nenhuma sobreposição. No gráfico por kata, 5 das 6 linhas sobem da esquerda para a direita, `com_ia` mais rápido em cada uma delas, o padrão mais limpo de toda a seção. A exceção é Estoque do Depósito, onde a média de `com_ia` fica um pouco acima da de `sem_ia` (293,75s contra 270,9s), puxada por um trial bem mais lento (381s) que pesa mais nessa média do que o outro trial `com_ia` do mesmo kata (206,5s). Mediana do tempo até passar em todos os testes de aceitação, 206,5s em `com_ia` contra 861,9s em `sem_ia`, cerca de 4,2 vezes mais rápido com IA.
+**Resultado**: mediana do tempo até passar em todos os testes de aceitação, 206,5s em `com_ia` (IQR 205,3s) contra 861,9s em `sem_ia` (IQR 574,2s), cerca de 4,2 vezes mais rápido com IA, diferença estatisticamente significativa (Mann-Whitney p=0,001).
+
+A caixa de `com_ia` fica inteira abaixo da caixa de `sem_ia`, sem nenhuma sobreposição, o padrão mais limpo de toda a seção. No gráfico por kata, 5 das 6 linhas sobem da esquerda para a direita, `com_ia` mais rápido em cada uma delas. A exceção é Estoque do Depósito, onde a média de `com_ia` fica um pouco acima da de `sem_ia` (293,75s contra 270,9s), puxada por um trial bem mais lento (381s) que pesa mais nessa média do que o outro trial `com_ia` do mesmo kata (206,5s).
 
 **RQ2, o uso de assistente de IA reduz a quantidade de defeitos (testes que falham) no código produzido?**
 
-Sem gráfico aqui, de propósito, um boxplot ou uma linha de valor constante não teria caixa nem inclinação para interpretar. Taxa de sucesso dos testes de aceitação e número de testes falhando, idênticos nos dois tratamentos, 100% de sucesso e 0 testes falhando em todos os 18 trials, `com_ia` e `sem_ia`. Sem nenhuma variância entre tratamentos, não há diferença para visualizar.
+**Resultado**: 100% de sucesso e 0 testes falhando em todos os 18 trials, `com_ia` e `sem_ia`, sem nenhuma diferença entre tratamentos.
+
+Sem gráfico aqui, de propósito, um boxplot ou uma linha de valor constante não teria caixa nem inclinação para interpretar.
 
 **RQ3, o uso de assistente de IA altera a complexidade ciclomática ou a duplicação do código produzido?**
 
 ![Boxplot da complexidade ciclomática média, com_ia vs sem_ia](results/graficos/rq3_cc_media_boxplot.png)
 ![Complexidade ciclomática média por kata, com_ia vs sem_ia](results/graficos/rq3_cc_media_slope.png)
 
-Complexidade ciclomática média por método, quanto menor, mais simples o código. As caixas de `com_ia` e `sem_ia` se sobrepõem bastante aqui, ao contrário do gráfico de tempo, já um sinal visual de que a diferença é pequena. Mediana 8,33 em `com_ia` contra 9,0 em `sem_ia`.
+**Resultado**: mediana da complexidade ciclomática média por método, 8,33 em `com_ia` (IQR 2,0) contra 9,0 em `sem_ia` (IQR 1,0), diferença pequena e não significativa (Mann-Whitney p=0,377).
+
+Quanto menor a complexidade, mais simples o código. As caixas de `com_ia` e `sem_ia` se sobrepõem bastante aqui, ao contrário do gráfico de tempo, coerente com uma diferença pequena.
 
 ![Boxplot da complexidade ciclomática por 100 LOC, com_ia vs sem_ia](results/graficos/rq3_complexidade_boxplot.png)
 ![Complexidade ciclomática por 100 LOC por kata, com_ia vs sem_ia](results/graficos/rq3_complexidade_slope.png)
 
-Mesma complexidade, agora dividida pelo tamanho do código, por 100 linhas, em vez de pelo número de métodos. Repare no gráfico por kata, diferente do de tempo, as linhas não vão todas para o mesmo lado, 3 dos 6 katas descem (`com_ia` mais complexo por LOC, Blocos Aninhados, Cofre de Senhas, Etiquetas de Preço), 2 sobem (`com_ia` menos complexo, Estoque do Depósito, Fila do Caixa) e 1 fica praticamente empatado (Elevador do Prédio, diferença de 0,05), essa mistura de direção é a inconsistência discutida em 4.3. Mediana geral 22,22 por 100 LOC em `com_ia` contra 29,03 em `sem_ia`. Duplicação, mediana 0% nos dois tratamentos, sem gráfico pelo mesmo motivo de RQ2.
+**Resultado**: mediana 22,22 por 100 LOC em `com_ia` (IQR 11,38) contra 29,03 em `sem_ia` (IQR 11,74), também pequena e não significativa (Mann-Whitney p=0,588). Duplicação, mediana 0% nos dois tratamentos, sem gráfico pelo mesmo motivo de RQ2.
+
+Mesma complexidade do gráfico anterior, agora dividida pelo tamanho do código, por 100 linhas, em vez de pelo número de métodos. Repare no gráfico por kata, diferente do de tempo, as linhas não vão todas para o mesmo lado, 3 dos 6 katas descem (`com_ia` mais complexo por LOC, Blocos Aninhados, Cofre de Senhas, Etiquetas de Preço), 2 sobem (`com_ia` menos complexo, Estoque do Depósito, Fila do Caixa) e 1 fica praticamente empatado (Elevador do Prédio, diferença de 0,05), essa mistura de direção é a inconsistência discutida em 4.3.
 
 **Inovações do grupo (verbosidade e estilo)**
 
 ![Boxplot de LOC, com_ia vs sem_ia](results/graficos/inovacao_loc_boxplot.png)
 ![LOC por kata, com_ia vs sem_ia](results/graficos/inovacao_loc_slope.png)
 
-LOC é o controle de verbosidade da RQ3, não uma métrica de qualidade por si só. As duas caixas quase se sobrepõem por inteiro (o primeiro quartil é o mesmo nos dois tratamentos), a diferença aparece na mediana, deslocada para cima em `com_ia`, 41 linhas contra 31.
+**Resultado**: mediana 41 linhas em `com_ia` (IQR 16,0) contra 31 em `sem_ia` (IQR 14,0), maior verbosidade com IA, mas sem significância no teste não pareado (Mann-Whitney p=0,624).
+
+LOC é o controle de verbosidade da RQ3, não uma métrica de qualidade por si só. As duas caixas quase se sobrepõem por inteiro (o primeiro quartil é o mesmo nos dois tratamentos), a diferença aparece na mediana, deslocada para cima em `com_ia`.
 
 ![Boxplot de violações de estilo por 100 LOC, com_ia vs sem_ia](results/graficos/inovacao_estilo_boxplot.png)
 ![Violações de estilo por 100 LOC por kata, com_ia vs sem_ia](results/graficos/inovacao_estilo_slope.png)
 
-Violações de estilo (PMD `codestyle`) já divididas por 100 LOC, para não confundir "mais violações" com "mais código". Caixas bem próximas e sobrepostas, as linhas por kata também vão em direções diferentes entre si, mediana 27,27 em `com_ia` contra 22,58 em `sem_ia`, valores exatos e testes estatísticos na Discussão a seguir.
+**Resultado**: mediana 27,27 violações por 100 LOC em `com_ia` (IQR 7,68) contra 22,58 em `sem_ia` (IQR 16,77), sem diferença estatística clara (Mann-Whitney p=0,950).
+
+Violações de estilo (PMD `codestyle`) já divididas por 100 LOC, para não confundir "mais violações" com "mais código". Caixas bem próximas e sobrepostas, as linhas por kata também vão em direções diferentes entre si.
 
 ### 4.3 Discussão
 
