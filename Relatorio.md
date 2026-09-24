@@ -154,31 +154,78 @@ Além dos 70% do enunciado (RQ1-RQ3), o grupo propôs seis frentes adicionais, t
 
 ### 4.1 Coleta de Dados
 
-*ORIENTAÇÃO: Relate o volume final de dados efetivamente coletado e analisado — não apenas o volume-alvo do enunciado. Informe: quantos itens restaram após os filtros de qualidade (ex.: dos 1.000 repositórios buscados, quantos tinham dados completos; dos repositórios candidatos, quantos de fato usavam GitHub Actions — Lab03); o período coberto pela coleta; quantos trials/execuções foram concluídos dentro do tempo (Lab02); quantos snapshots do Kanban estão disponíveis e desde quando (Lab04/Lab05); outliers ou dados ausentes identificados, e como foram tratados (removidos, mantidos e discutidos à parte, etc.).*
+Os 18 trials planejados (3 integrantes x 6 katas, 9 `com_ia` e 9 `sem_ia`) foram todos concluídos, 100% do volume-alvo, entre 14 e 16 de setembro de 2026. Nenhum trial foi descartado, censurado (não terminou dentro do time-box de 35 minutos) ou abortado por falha de ambiente, os 18 têm status `sucesso` em `results/time_results.csv`, com 100% dos testes de aceitação passando ao final de cada um.
 
-*[conteúdo do grupo — substituir este texto]*
+A revisão sistemática de outliers ([scripts/outliers.sh](scripts/outliers.sh), cercas de Tukey 1,5x/3x IQR sobre tempo, LOC, complexidade, duplicação e violações de estilo) identificou dois trials fora da cerca de LOC, nenhum nas demais métricas. `trial-arthur-01-cofre-de-senhas-sem_ia`, 118 LOC, outlier extremo, acima da cerca superior de 66,75 (mediana do grupo na faixa de 30-40 LOC), e `trial-gabriel-05-cofre-de-senhas-com_ia`, 79 LOC, outlier moderado, mesma cerca. Os dois foram revisados e mantidos no dataset, ambos do kata Cofre de Senhas, o mais longo dos seis, não indício de erro de coleta, e a decisão está detalhada em [HIPOTESES.md](HIPOTESES.md#identificação-e-tratamento-de-outliers).
+
+Duplicação de código (PMD CPD) deu 0% nos 18 trials, sem nenhuma ocorrência em nenhum tratamento, resultado plausível para katas desse tamanho e já validado com um teste sintético de duplicação antes da coleta real.
 
 ### 4.2 Visualização Gráfica
 
-*ORIENTAÇÃO: Para cada Questão de Pesquisa (do enunciado e das RQs de inovação do grupo), inclua ao menos uma visualização que a responda diretamente, com a pergunta enunciada em texto imediatamente antes do gráfico correspondente, eixos nomeados com clareza e a medida de tendência central adequada indicada (mediana costuma ser preferível a média quando há outliers ou distribuição assimétrica — comum em dados de repositórios de software). Use o tipo de gráfico adequado ao tipo de pergunta, conforme a tabela abaixo, e explicite no texto os valores-chave que aparecem no gráfico (não deixe o leitor "adivinhar" o número a partir da figura).*
+Cada RQ recebe um boxplot pareado (`com_ia` vs `sem_ia`) e, quando aplicável, um gráfico de pontos conectados por kata, o tipo de visualização recomendado para comparar dois tratamentos no mesmo grupo. Os dois tipos se repetem ao longo da seção, a leitura abaixo vale para todos. No boxplot, a caixa cobre do primeiro ao terceiro quartil, os 50% centrais dos 9 trials daquele tratamento, com a mediana marcada dentro dela, os traços finos (whiskers) marcam o menor e o maior valor observado. Quanto menos as duas caixas se sobrepõem, mais consistente é a diferença entre tratamentos. No gráfico por kata, cada linha liga a média de `com_ia` (esquerda) à média de `sem_ia` (direita) para um mesmo kata, controlando a dificuldade específica dele, uma linha subindo da esquerda para a direita indica que aquele kata teve valor menor com IA, descendo indica valor maior com IA, e linhas todas para o mesmo lado indicam um efeito consistente entre katas, linhas em direções diferentes indicam um efeito que muda conforme o kata.
 
-| Tipo de pergunta / dado | Gráfico recomendado |
-|---|---|
-| Comparar uma métrica entre categorias (ex.: linguagem, benchmark DORA) | Barras (ranking) — ordenadas por valor, não alfabeticamente |
-| Comparar dois tratamentos no mesmo grupo (ex.: com IA vs. sem IA) | Boxplot pareado ou gráfico de pontos conectados (before/after) |
-| Distribuição de uma métrica numérica (ex.: idade dos repositórios) | Histograma ou boxplot |
-| Relação entre duas métricas numéricas (ex.: RQ07 do Lab01, RQ05 do Lab03) | Gráfico de dispersão (scatter plot) |
-| Evolução ao longo do tempo (ex.: cycle time por sprint) | Linha, com um ponto por sprint/snapshot |
-| Composição/fluxo do Kanban ao longo do tempo (Cumulative Flow Diagram) | Área empilhada (uma camada por coluna do board) |
-| Proporção de categorias (ex.: % de issues fechadas) | Barra única 100% ou barras simples — evite pizza com muitas fatias |
+**RQ1, o uso de assistente de IA reduz o tempo necessário para resolver uma tarefa de programação?**
 
-*[Insira aqui os gráficos do grupo, um por RQ, cada um precedido da pergunta que ele responde]*
+![Boxplot do tempo, time-to-green, com_ia vs sem_ia](results/graficos/rq1_tempo_boxplot.png)
+![Tempo por kata, com_ia vs sem_ia](results/graficos/rq1_tempo_slope.png)
+
+**Resultado**: mediana do tempo até passar em todos os testes de aceitação, 206,5s em `com_ia` (IQR 205,3s) contra 1007,0s em `sem_ia` (IQR 348,6s), cerca de 4,9 vezes mais rápido com IA, diferença estatisticamente significativa (Mann-Whitney p<0,001).
+
+A caixa de `com_ia` fica inteira abaixo da caixa de `sem_ia`, sem nenhuma sobreposição, o padrão mais limpo de toda a seção. No gráfico por kata, as 6 linhas sobem da esquerda para a direita, sem exceção, `com_ia` mais rápido em cada um dos 6 katas.
+
+**RQ2, o uso de assistente de IA reduz a quantidade de defeitos (testes que falham) no código produzido?**
+
+**Resultado**: 100% de sucesso e 0 testes falhando em todos os 18 trials, `com_ia` e `sem_ia`, sem nenhuma diferença entre tratamentos.
+
+Sem gráfico aqui, de propósito, um boxplot ou uma linha de valor constante não teria caixa nem inclinação para interpretar.
+
+**RQ3, o uso de assistente de IA altera a complexidade ciclomática ou a duplicação do código produzido?**
+
+![Boxplot da complexidade ciclomática média, com_ia vs sem_ia](results/graficos/rq3_cc_media_boxplot.png)
+![Complexidade ciclomática média por kata, com_ia vs sem_ia](results/graficos/rq3_cc_media_slope.png)
+
+**Resultado**: mediana da complexidade ciclomática média por método, 8,33 em `com_ia` (IQR 2,0) contra 9,0 em `sem_ia` (IQR 1,0), diferença pequena e não significativa (Mann-Whitney p=0,377).
+
+Quanto menor a complexidade, mais simples o código. As caixas de `com_ia` e `sem_ia` se sobrepõem bastante aqui, ao contrário do gráfico de tempo, coerente com uma diferença pequena.
+
+![Boxplot da complexidade ciclomática por 100 LOC, com_ia vs sem_ia](results/graficos/rq3_complexidade_boxplot.png)
+![Complexidade ciclomática por 100 LOC por kata, com_ia vs sem_ia](results/graficos/rq3_complexidade_slope.png)
+
+**Resultado**: mediana 22,22 por 100 LOC em `com_ia` (IQR 11,38) contra 29,03 em `sem_ia` (IQR 11,74), também pequena e não significativa (Mann-Whitney p=0,588). Duplicação, mediana 0% nos dois tratamentos, sem gráfico pelo mesmo motivo de RQ2.
+
+Mesma complexidade do gráfico anterior, agora dividida pelo tamanho do código, por 100 linhas, em vez de pelo número de métodos. Repare no gráfico por kata, diferente do de tempo, as linhas não vão todas para o mesmo lado, 3 dos 6 katas descem (`com_ia` mais complexo por LOC, Blocos Aninhados, Cofre de Senhas, Etiquetas de Preço), 2 sobem (`com_ia` menos complexo, Estoque do Depósito, Fila do Caixa) e 1 fica praticamente empatado (Elevador do Prédio, diferença de 0,05), essa mistura de direção é a inconsistência discutida em 4.3.
+
+**Inovações do grupo (verbosidade e estilo)**
+
+![Boxplot de LOC, com_ia vs sem_ia](results/graficos/inovacao_loc_boxplot.png)
+![LOC por kata, com_ia vs sem_ia](results/graficos/inovacao_loc_slope.png)
+
+**Resultado**: mediana 41 linhas em `com_ia` (IQR 16,0) contra 31 em `sem_ia` (IQR 14,0), maior verbosidade com IA, mas sem significância no teste não pareado (Mann-Whitney p=0,624).
+
+LOC é o controle de verbosidade da RQ3, não uma métrica de qualidade por si só. As duas caixas quase se sobrepõem por inteiro (o primeiro quartil é o mesmo nos dois tratamentos), a diferença aparece na mediana, deslocada para cima em `com_ia`.
+
+![Boxplot de violações de estilo por 100 LOC, com_ia vs sem_ia](results/graficos/inovacao_estilo_boxplot.png)
+![Violações de estilo por 100 LOC por kata, com_ia vs sem_ia](results/graficos/inovacao_estilo_slope.png)
+
+**Resultado**: mediana 27,27 violações por 100 LOC em `com_ia` (IQR 7,68) contra 22,58 em `sem_ia` (IQR 16,77), sem diferença estatística clara (Mann-Whitney p=0,950).
+
+Violações de estilo (PMD `codestyle`) já divididas por 100 LOC, para não confundir "mais violações" com "mais código". Caixas bem próximas e sobrepostas, as linhas por kata também vão em direções diferentes entre si.
 
 ### 4.3 Discussão
 
-*ORIENTAÇÃO: Para cada RQ (do enunciado e das RQs de inovação do grupo), compare explicitamente a hipótese informal levantada na Introdução com o resultado efetivamente obtido — hipótese confirmada, refutada, ou parcialmente confirmada, e por quê. Quando houver teste estatístico (ex.: Wilcoxon no Lab02), reporte o valor obtido e interprete o que ele significa em linguagem acessível, não apenas o número bruto. Discuta as ameaças à validade específicas do laboratório (ex.: efeito de aprendizado entre katas e risco de memorização pela IA — Lab02; diferença de dificuldade entre laboratórios distintos confundindo a tendência de cycle time — Lab05; lacunas nos snapshots do Kanban — Lab05). Finalize relacionando o que as inovações do grupo (seção 3.6) acrescentaram: elas confirmaram, contradisseram ou aprofundaram o que os 70% do enunciado já mostravam?*
+**RQ1, tempo**: hipótese confirmada. A mediana de tempo caiu de 1007,0s (`sem_ia`) para 206,5s (`com_ia`), efeito máximo e significativo nas duas medidas, r rank-biserial de -1,0 no Wilcoxon pareado por kata (W+=0, n=6, p=0,031, o menor p alcançável com apenas 6 pares) e Cliff's delta de -1,0 no Mann-Whitney não pareado (9 vs 9, p<0,001, separação perfeita entre os dois grupos). Os 6 katas, sem exceção, tiveram `com_ia` mais rápido que `sem_ia`, a convergência das duas análises, pareada e não pareada, dá confiança de que o efeito é real e não um artefato de um único teste.
 
-*[conteúdo do grupo — substituir este texto]*
+**RQ2, defeitos**: hipótese nem confirmada nem refutada, sem o que testar. Os 18 trials tiveram 100% de sucesso e 0 testes falhando, `com_ia` e `sem_ia`, sem nenhuma variância entre tratamentos. Isso não significa "sem efeito", significa que os katas foram calibrados dentro da capacidade dos dois tratamentos no time-box de 35 minutos, um resultado esperado do próprio desenho do experimento, não uma falha de coleta.
+
+**RQ3, estrutura do código**: hipótese parcialmente confirmada, com uma inconsistência que vale registrar. A parte de duplicação bateu com o esperado, 0% nos dois tratamentos, sem diferença. A complexidade ciclomática bruta por método ficou menor em `com_ia` (mediana 8,33 vs 9,0, Wilcoxon pareado p=0,625 com r=-0,40 médio, Mann-Whitney p=0,377 com Cliff's delta -0,25 pequeno), mas com apenas n=4 pares não zerados (2 dos 6 katas tiveram diferença zero de `cc_media` entre tratamentos), é a estimativa menos confiável do conjunto. A versão normalizada por 100 LOC não confirma essa direção, os 18 trials agrupados só por tratamento dão `com_ia` menor (mediana 22,22 vs 29,03), mas pareando por kata a direção não é uniforme, `com_ia` fica mais complexo por LOC em 3 dos 6 katas, menos complexo em 2, e praticamente empatado em 1 (Wilcoxon p=0,688, r=0,24 pequeno, sinal oposto ao da métrica bruta). Nenhuma das estatísticas cruza 0,05, então nada disso é conclusivo, mas a inversão de sinal entre a comparação simples por tratamento e a comparação pareada por kata mostra que a mediana não pareada pode estar sendo puxada por qual kata caiu em qual tratamento (o contrabalanceamento troca o integrante, não o kata, entre tratamentos), não por um efeito real do assistente de IA. Com N=18 e 6 pares, RQ3 fica sem resposta clara, nem confirmando nem refutando a expectativa de pouca diferença de complexidade levantada na Introdução.
+
+**Inovação, verbosidade e estilo (LOC e PMD `codestyle`)**: LOC ficou maior em `com_ia` (mediana 41 vs 31 linhas), confirmando a expectativa de maior verbosidade levantada na Introdução, com efeito grande no teste pareado (r=-0,87, p=0,125) mas não significativo no não pareado (p=0,624), o mesmo padrão de RQ1, um efeito visível que ainda não cruza 0,05 com N=18. Violações de estilo por 100 LOC ficaram um pouco maiores em `com_ia` (mediana 27,27 contra 22,58 de `sem_ia`), mas sem diferença estatística clara, o teste pareado deu efeito médio não significativo (p=0,563) e o não pareado deu efeito negligível (p=0,950). Ou seja, o código com IA saiu mais verboso, mas não claramente menos conforme ao style guide por linha.
+
+**Inovação, correlação tempo x violações**: a hipótese de que "pressa gera mais violações" não se sustentou de forma consistente, a correlação de Spearman deu sinais opostos entre os tratamentos e nenhuma passou no limiar de 0,05 bilateral (a mais próxima, `com_ia`, tempo x violações por KLOC, rho=-0,57, p=0,121), então não há evidência forte de que o tempo do trial, por si só, explique a diferença de conformidade de estilo.
+
+**Inovação, segurança (Semgrep)**: 0 vulnerabilidades encontradas nos 18 trials, `com_ia` e `sem_ia`, resultado esperado dado o escopo pequeno e a natureza dos katas, que não envolvem entrada de rede, banco de dados ou serialização, superfícies mais comuns de vulnerabilidade estática.
+
+**Síntese das inovações**: as seis frentes adicionais (seção 1) não contradisseram os 70% do enunciado, aprofundaram, dando tamanho de efeito onde só havia p-valor, mostrando que a maior verbosidade de `com_ia` é real mas não necessariamente pior em conformidade de estilo, e descartando a hipótese simples de que pressa explica a diferença de estilo observada.
 
 ## 5. Conclusão
 

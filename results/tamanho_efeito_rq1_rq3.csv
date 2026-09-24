@@ -1,4 +1,4 @@
 metrica,mediana_com_ia,iqr_com_ia,mediana_sem_ia,iqr_sem_ia,wilcoxon_kata_W,wilcoxon_kata_n,wilcoxon_kata_p,wilcoxon_kata_r,wilcoxon_kata_r_interpretacao,mannwhitney_U,mannwhitney_p,cliffs_delta,cliffs_delta_interpretacao
-tempo_seg,206.5,205.3,861.9,574.2,1.0,6,0.0625,-0.9048,grande,6.0,0.0012,-0.8519,grande
+tempo_seg,206.5,205.3,1007.0,348.6,0,6,0.0312,-1.0,grande,0.0,0.0,-1.0,grande
 cc_media,8.33,2.0,9.0,1.0,3.0,4,0.625,-0.4,medio,30.5,0.3768,-0.2469,pequeno
 duplicacao_pct,0.0,0.0,0.0,0.0,,0,,,n/a,40.5,1.0,0.0,negligivel

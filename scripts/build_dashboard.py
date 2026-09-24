@@ -23,6 +23,7 @@ COM, SEM = "com_ia", "sem_ia"
 METRICAS_BOXPLOT = [
     ("tempo_seg", "tempo_seg", "time", "Tempo (time-to-green)", "s"),
     ("cc_media", "cc_media", "metrics", "Complexidade ciclomática média", ""),
+    ("complexidade_por_100loc", "complexidade_por_100loc", "estrutura", "Complexidade ciclomática por 100 LOC", ""),
     ("loc_total", "loc_total", "metrics", "LOC (verbosidade)", "linhas"),
     ("violacoes_por_100loc", "violacoes_por_100loc", "lint", "Violações de estilo por 100 LOC", ""),
 ]
@@ -40,6 +41,10 @@ def parse_args(argv):
     )
     parser.add_argument(
         "--efeito-rq-csv", type=Path, default=Path("results/tamanho_efeito_rq1_rq3.csv")
+    )
+    parser.add_argument("--estrutura-csv", type=Path, default=Path("results/estrutura_normalizada.csv"))
+    parser.add_argument(
+        "--efeito-estrutura-csv", type=Path, default=Path("results/estrutura_normalizada_comparacao.csv")
     )
     parser.add_argument("--security-csv", type=Path, default=Path("results/security_results.csv"))
     parser.add_argument("--outliers-csv", type=Path, default=Path("results/outliers.csv"))
@@ -140,6 +145,8 @@ def main(argv):
     outliers_rows = read_csv(args.outliers_csv)
     efeito_estilo = read_csv_by_metrica(args.efeito_estilo_csv)
     efeito_rq = read_csv_by_metrica(args.efeito_rq_csv)
+    estrutura_rows = read_csv_by_trial(args.estrutura_csv)
+    efeito_estrutura = read_csv_by_metrica(args.efeito_estrutura_csv)
 
     trial_ids = sorted(time_rows)
     if not trial_ids:
@@ -147,7 +154,7 @@ def main(argv):
 
     kata_por_trial = {tid: time_rows[tid]["kata"] for tid in trial_ids}
     treatment_por_trial = {tid: time_rows[tid]["treatment"] for tid in trial_ids}
-    fontes = {"time": time_rows, "metrics": metrics_rows, "lint": lint_rows}
+    fontes = {"time": time_rows, "metrics": metrics_rows, "lint": lint_rows, "estrutura": estrutura_rows}
 
     boxplots = {}
     slopes = {}
@@ -160,6 +167,7 @@ def main(argv):
     estatisticas = {
         "tempo_seg": formatar_estatistica(efeito_rq.get("tempo_seg")),
         "cc_media": formatar_estatistica(efeito_rq.get("cc_media")),
+        "complexidade_por_100loc": formatar_estatistica(efeito_estrutura.get("complexidade_por_100loc")),
         "loc_total": formatar_estatistica(efeito_estilo.get("loc_total")),
         "violacoes_por_100loc": formatar_estatistica(efeito_estilo.get("violacoes_por_100loc")),
     }
@@ -319,6 +327,11 @@ TEMPLATE = r"""<!doctype html>
       <div class="grafico" id="chart-box-cc_media"></div>
       <div class="grafico" id="chart-slope-cc_media"></div>
     </div>
+    <div class="graficos-par">
+      <div class="grafico" id="chart-box-complexidade_por_100loc"></div>
+      <div class="grafico" id="chart-slope-complexidade_por_100loc"></div>
+    </div>
+    <div class="nota" id="complexidade-nota"></div>
     <div class="nota" id="rq3-duplicacao"></div>
   </section>
 
@@ -406,7 +419,11 @@ document.getElementById("rq2-texto").innerHTML =
     ? `<strong>100% de sucesso</strong> nos ${DADOS.n_trials} trials (nenhum teste falhando ao final do time-box) — sem variância para comparar, por isso sem boxplot aqui (um boxplot de valor constante não informa nada).`
     : `${DADOS.n_nao_sucesso} de ${DADOS.n_trials} trials sem sucesso — ver time_results.csv.`;
 document.getElementById("rq3-subtitulo").textContent =
-  "Complexidade ciclomática média (CK), boxplot bruto e média por kata.";
+  "Complexidade ciclomática média (CK), boxplot bruto e média por kata, mais a versão normalizada por 100 LOC.";
+const ccBruta = DADOS.estatisticas.cc_media;
+const ccNormalizada = DADOS.estatisticas.complexidade_por_100loc;
+document.getElementById("complexidade-nota").innerHTML =
+  `<strong>Atenção ao sinal</strong>: o Wilcoxon pareado por kata da complexidade bruta (r=${fmt(ccBruta.wilcoxon_kata_r, 2)}, ${ccBruta.wilcoxon_kata_r_interpretacao}) tem sinal oposto ao da complexidade por 100 LOC (r=${fmt(ccNormalizada.wilcoxon_kata_r, 2)}, ${ccNormalizada.wilcoxon_kata_r_interpretacao}) — mesmo confundimento por kata do gráfico de LOC abaixo, não inconsistência de coleta. Ver HIPOTESES.md.`;
 document.getElementById("rq3-duplicacao").innerHTML =
   `<strong>Duplicação de código</strong>: ${fmt(DADOS.duplicacao_max, 1)}% no máximo entre os ${DADOS.n_trials} trials (0% na maioria) — sem variância suficiente para um teste ou gráfico informativo.`;
 document.getElementById("seguranca-texto").innerHTML =
@@ -460,7 +477,7 @@ function montarSlope(elId, pares, rotulo) {
   return chart;
 }
 
-["tempo_seg", "cc_media", "loc_total", "violacoes_por_100loc"].forEach(chave => {
+["tempo_seg", "cc_media", "complexidade_por_100loc", "loc_total", "violacoes_por_100loc"].forEach(chave => {
   montarBoxplot(`chart-box-${chave}`, DADOS.boxplots[chave]);
   montarSlope(`chart-slope-${chave}`, DADOS.slopes[chave], DADOS.boxplots[chave].rotulo);
 });

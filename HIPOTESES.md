@@ -94,15 +94,14 @@ pares) para as duas variáveis de RQ1/RQ2
 
 | Métrica | Mediana com_ia \| sem_ia | Wilcoxon p | r rank-biserial |
 | --- | --- | --- | --- |
-| RQ1: tempo (seg) | 206.5 \| 861.9 | 0.062 | -0.90 (grande) |
+| RQ1: tempo (seg) | 206.5 \| 1007.0 | 0.031 | -1.0 (grande) |
 | RQ2: taxa de sucesso (%) | 100 \| 100 | n/a | n/a |
 | RQ2: testes falhando | 0 \| 0 | n/a | n/a |
 
-RQ1 (tempo) tem um `r` grande, mesmo o `p` pareado por kata (n=6, teste
-exato) não cruzando 0,05, o menor `p` alcançável com apenas 6 pares é
-0,03125, então 0,062 já é o segundo menor valor possível nessa amostra; a
-versão não pareada (Mann-Whitney, 9 vs 9) do mesmo dado, na seção abaixo,
-chega a p=0,001. RQ2 fica sem teste possível, os 18 trials têm 100% de
+RQ1 (tempo) tem `r` máximo, o `p` pareado por kata (n=6, teste exato) já
+cruza 0,05, é o menor `p` alcançável com apenas 6 pares, 0,03125; a versão
+não pareada (Mann-Whitney, 9 vs 9) do mesmo dado, na seção abaixo, chega a
+p<0,001, separação perfeita entre os dois grupos. RQ2 fica sem teste possível, os 18 trials têm 100% de
 sucesso e zero testes falhando em todos, sem nenhuma variância entre
 tratamentos, então as diferenças pareadas por kata são todas zero e o
 Wilcoxon signed-rank fica indefinido (n=0 após remover empates em zero).
@@ -173,7 +172,7 @@ diretas das estatísticas de teste já calculadas:
 
 | Métrica | Mediana com_ia \| sem_ia | Mann-Whitney p | Cliff's delta |
 | --- | --- | --- | --- |
-| RQ1: tempo (seg) | 206.5 \| 861.9 | **0.001** | **-0.85 (grande)** |
+| RQ1: tempo (seg) | 206.5 \| 1007.0 | **<0.001** | **-1.0 (grande)** |
 | RQ3: complexidade ciclomática média | 8.33 \| 9.0 | 0.377 | -0.25 (pequeno) |
 | RQ3: duplicação (%) | 0.0 \| 0.0 | 1.000 | 0.0 (negligível) |
 
@@ -244,17 +243,19 @@ conformidade de estilo entre `com_ia` e `sem_ia` nesses 18 trials.
 
 **Correlação tempo × violações** ([scripts/correlacao_tempo_violacoes.sh](scripts/correlacao_tempo_violacoes.sh),
 Spearman exato, H1 unilateral "trial mais rápido tem mais violações",
-`results/correlacao_tempo_violacoes.csv`): a única correlação que cruza
-significância unilateral (0,05) é em `com_ia`, análise C (tempo e violações
-relativos à média do próprio kata): **rho=-0,594, p(rho<0)=0,049**, nos
-trials com IA, terminar mais rápido que a média do kata está associado a
-mais violações de estilo que a média do kata. Em `sem_ia`, a mesma análise
-dá rho=0,000 (nenhuma relação). As demais análises (A: tempo x violações
-brutas; B: tempo x violações por KLOC) não são significativas em nenhum dos
-dois tratamentos. Isto é: há um indício (não uma prova, N=9 por tratamento)
-de que ir mais rápido com IA tem um custo de conformidade que não aparece na
-resolução manual, coerente com um trade-off velocidade/qualidade específico
-do uso de IA, mas seria preciso mais dados para confirmar.
+`results/correlacao_tempo_violacoes.csv`): nenhuma das seis correlações
+(análises A/B/C, `com_ia`/`sem_ia`) cruza significância unilateral (0,05). A
+mais próxima é em `com_ia`, análise B (tempo e violações por KLOC):
+**rho=-0,567, p(rho<0)=0,060**, sinal na direção oposta à hipótese (terminar
+mais devagar associado a mais violações por KLOC, não menos), mas sem
+significância estatística. A análise C (tempo relativo à média do kata x
+violações relativas à média do kata) também não é significativa em `com_ia`
+(rho=-0,502, p(rho<0)=0,086) nem em `sem_ia` (rho=-0,033), e a análise A
+(tempo x violações brutas) não mostra padrão em nenhum dos dois tratamentos.
+Isto é: a hipótese de que "pressa gera mais violações" não se sustenta de
+forma consistente nesses 18 trials, os sinais mudam de direção entre
+tratamentos e nenhum cruza o limiar convencional, seria preciso mais dados
+para investigar qualquer tendência.
 
 **Ressalva sobre N pequeno**: os mesmos limites de RQ1/RQ3 valem aqui, 5-6
 pares no Wilcoxon, 9 vs 9 no Mann-Whitney e Spearman. Nenhum desses
@@ -342,7 +343,7 @@ mesmo kata:
 `tempo_seg`, `cc_media`, `duplicacao_pct` e `violacoes_por_100loc` não têm
 nenhum ponto fora da cerca 1,5x em nenhum dos 18 trials — em particular,
 `tempo_seg` varia ~60x entre o trial mais rápido (25,3s) e o mais lento
-(1506,6s) sem cruzar a cerca superior (~1728s): essa variação é o próprio
+(1506,6s) sem cruzar a cerca superior (~2094s): essa variação é o próprio
 efeito grande de RQ1 já documentado acima, não uma anomalia.
 
 **Decisão: manter os dois, sem exclusão.** Dos 3 trials do kata Cofre de
